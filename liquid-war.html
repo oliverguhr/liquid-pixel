@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarm Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #222;
+        }
+
+        canvas {
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="swarmCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('swarmCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const PARTICLE_COUNT = 400;
+        const PARTICLE_RADIUS = 2;
+        const SPEED = 2;
+        const map = Array(800/ PARTICLE_RADIUS).fill(null).map(() => Array(600/ PARTICLE_RADIUS));
+        const map_distance = Array(800/ PARTICLE_RADIUS).fill(0.0).map(() => Array(600/ PARTICLE_RADIUS));
+
+        function euclid(startx,starty, goalx,goaly) {
+            let x = startx - goalx;
+            let y = starty - goaly;
+            return Math.hypot(x, y); // short form for Math.sqrt( x*x + y*y );
+        }
+
+        function calculateGradient(){
+            //redo everytime mouse changes
+            // get cell for mouse position
+            player_cellx = Math.round(player.x / PARTICLE_RADIUS)
+            player_celly = Math.round(player.y / PARTICLE_RADIUS)                 
+            //todo: remove obstacles from list
+                // Wurzel aus ((x_2-x_1)^2 + (y_2-y_1)^2) -> euclid
+                
+            
+            //iterate over all cells in map
+            for (let row = 0; row < map_distance.length; row++) {
+                const colmuns = map_distance[row];
+                for (let col = 0; col < colmuns.length; col++) {                                        
+                    // calc dist from cell to mouse   
+                    colmuns[col] = euclid(player_cellx,player_celly,row,col)
+                }
+                
+            }            
+        }
+
+        function Particle(x, y, dx, dy) {
+            this.x = x;
+            this.y = y;
+            this.dx = dx;
+            this.dy = dy;
+        }
+
+        Particle.prototype.get_coordinates = function(){
+            let x_cell = Math.round(this.x / PARTICLE_RADIUS) 
+            let y_cell = Math.round(this.y / PARTICLE_RADIUS)
+            return {x:x_cell,y:y_cell}
+        }
+
+        Particle.prototype.update = function () {
+            let new_x = this.x + (this.dx * SPEED * random(0.5,2));
+            let new_y = this.y + (this.dy * SPEED * random(0.5,2));
+            
+            if (new_x - PARTICLE_RADIUS < 0 || new_x + PARTICLE_RADIUS > canvas.width) {
+                //this.dx = -this.dx;
+                new_x = this.x // + this.dx * SPEED;
+            }
+            
+            if (new_y - PARTICLE_RADIUS < 0 || new_y + PARTICLE_RADIUS > canvas.height) {
+                //this.dy = -this.dy;
+                new_y = this.y // + this.dy * SPEED;
+            }
+
+            let x_cell = Math.round(new_x / PARTICLE_RADIUS) 
+            let y_cell = Math.round(new_y / PARTICLE_RADIUS)
+            
+            if(map[x_cell][y_cell] === undefined)
+            {
+                map[Math.round(this.x/ PARTICLE_RADIUS)][Math.round(this.y/ PARTICLE_RADIUS)] = undefined
+                map[x_cell][y_cell] = this
+                this.x = new_x
+                this.y = new_y
+            }
+        }
+
+        Particle.prototype.draw = function () {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, PARTICLE_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function createParticles() {
+            const particles = [];
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const x = random(PARTICLE_RADIUS, canvas.width - PARTICLE_RADIUS);
+                const y = random(PARTICLE_RADIUS, canvas.height - PARTICLE_RADIUS);
+                const dx = random(-1, 1);
+                const dy = random(-1, 1);
+
+
+                particles.push(new Particle(x, y, dx, dy));
+            }
+
+            return particles;
+        }
+
+        Particle.prototype.update_particle_direction = function (goal_x, goal_y) {
+            //schau dir alle zellen in der umgebung an und finde die Zelle mit den niedrigsten wert
+            cell = this.get_coordinates()
+            const row = cell.y
+            const col = cell.x
+            const min = {distance : Number.POSITIVE_INFINITY, dx:0, dy:0}
+
+            for (let y = row - 1; y <= row + 1; y++) {
+                for (let x = col - 1; x <= col + 1; x++) {
+                // ignoriere die aktuelle Zelle
+                    if (y === 0 && x === 0) {
+                        continue;
+                    }
+
+                    distance = get_cell(map_distance,y,x)
+                    particle = get_cell(map,y,x)
+                    if (distance < min.distance && particle == undefined){
+                        min.distance = distance
+                        min.dx = x - col  
+                        min.dy = y - row  // leedcode lol
+                    }
+                }
+            }            
+            //console.log(player,cell, min)
+            this.dx = min.dx
+            this.dy = min.dy            
+        }        
+
+        function get_cell(map,x,y){
+                if(y > 0 && x > 0 && y < map.length && x < map[0].length){
+                    return map[y][x]                
+                }
+                return undefined
+        }
+        
+
+        const particles = createParticles();
+        var player = { x: 0, y: 0 }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const particle of particles) {
+                particle.update_particle_direction(player.x,player.y)
+                particle.update();
+                particle.draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        const swarmCanvas = document.getElementById("swarmCanvas")
+        swarmCanvas.addEventListener('mousemove', handleMouseMove);
+
+        setInterval(calculateGradient,100)
+
+        function handleMouseMove(event) {
+            const rect = swarmCanvas.getBoundingClientRect();
+            const scaleX = swarmCanvas.width / rect.width;
+            const scaleY = swarmCanvas.height / rect.height;
+
+            player.x = (event.clientX - rect.left) * scaleX;
+            player.y = (event.clientY - rect.top) * scaleY;
+
+            //console.log('Mouse coordinates:', x, y);
+        }
+
+
+    </script>
+</body>
