@@ -2,6 +2,7 @@
 function setup() {
     env = new Environment()
     createCanvas(env.FIELD_X, env.FIELD_Y);
+    env.createParticles();
     // frameRate(24);
   }
   
