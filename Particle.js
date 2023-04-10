@@ -55,8 +55,8 @@ class Particle {
 
 
     this.show = function () {
-      fill(255, 204, 0);
-      circle(this.x, this.y, env.SCALE);
+      env.foreground.fill('white');
+      env.foreground.circle(this.x, this.y, env.SCALE);
     };
   }
 }

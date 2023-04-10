@@ -2,18 +2,36 @@
 function setup() {
     env = new Environment()
     createCanvas(env.FIELD_X, env.FIELD_Y);
-    env.createParticles();
-    env.setXY();
+    env.init();
+    
+    button = createButton('spawn');
+    button.position(20, 20);
+    button.mousePressed(start);
     // frameRate(24);
   }
   
   function draw() {
+    
     noCursor();
-    background(51); // darkest charcoal grey 
-
+    // background('rgba(0%, 0%, 0%, 0)'); // darkest charcoal grey 
     env.update();
     env.show();
-    
+    image(env.background, 0, 0);
+    image(env.foreground, 0, 0);
+  }
+
+  function start() {
+    env.running = true;
+    env.createParticles();
+  }
+
+  
+  function mouseDragged() {
+    // ellipse(mouseX, mouseY, 5, 5);
+    // prevent default
+    env.player.pos();
+    env.createObstracles();
+    return false;
   }
   
   function mouseMoved() {

@@ -5,11 +5,15 @@ class Environment {
         this.PARTICLE_COUNT = 1000;
         this.SCALE = 4;
         this.SPEED = 8;
+        this.running = false;
+        this.background = createGraphics(this.FIELD_X, this.FIELD_Y);
+        this.foreground = createGraphics(this.FIELD_X, this.FIELD_Y);
         this.map = Array.from({ length: this.FIELD_Y }, () => Array.from({ length: this.FIELD_X }, () => new Cell()));
         
 
         this.player = new Player(this);
-        this.particles = undefined;
+        this.particles = [];
+        this.obstracles = [];
 
         this.createParticles = function () {
             const particles = [];
@@ -21,7 +25,12 @@ class Environment {
             this.particles = particles;
         };
 
-        this.setXY= function () {
+        this.init= function () {
+            env.background.background(51);
+            env.background.noStroke();
+            env.foreground.background('rgba(0%, 100%, 0%, 50%)');
+
+
             for (let row = 0; row < this.map.length; row++) {
                 const colmuns = this.map[row];
                 for (let col = 0; col < colmuns.length; col++) {                                        
@@ -42,11 +51,38 @@ class Environment {
         };
 
         this.show = function () {
+            env.foreground.clear();
             this.player.show();
             this.particles.forEach(p => {
                 p.show();
             });
+
+            if(!this.running)
+            {
+                this.obstracles.forEach(o => {
+                    o.show();
+                });
+            }
         };
+
+        this.createObstracles = function () {
+            if (mouseIsPressed === true) {
+                let col = env.player.x;
+                let row  = env.player.y;
+                let r = this.player.playerScale;
+
+                new Obstracle(env, col, row);
+                
+                for (let y = row - r; y <= row + r; y++) {
+                    for (let x = col - r; x <= col + r; x++) {
+                        let cell = env.getCell(x,y)
+                        if (r >= dist(col,row,x,y) && cell != undefined) {
+                            new Obstracle(env, x,y);
+                        }
+                    }
+                }  
+            }
+        }
 
         this.updateGradient = function() {
             //iterate over all cells in map

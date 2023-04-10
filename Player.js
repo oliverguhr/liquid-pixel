@@ -13,17 +13,17 @@ class Player {
     }
 
     this.update = function () {
-      this.getCellsInDistance(false,this.x,this.y)
+      this.getCellsInDistance(false,this.x,this.y);
 
       this.x = constrain(this.dx, 0, env.FIELD_X - env.SCALE);
       this.y = constrain(this.dy, 0, env.FIELD_Y - env.SCALE);
 
-      this.getCellsInDistance(true,this.x,this.y)
+      this.getCellsInDistance(true,this.x,this.y);
     };
 
     this.show = function () {
-      fill(150);
-      circle(this.x, this.y,  this.playerScale);
+      env.foreground.fill(150);
+      env.foreground.circle(this.x, this.y,  this.playerScale);
     };
 
     this.getCellsInDistance = function (bool, dx,dy) {
@@ -37,7 +37,7 @@ class Player {
       for (let y = row - r; y <= row + r; y++) {
         for (let x = col - r; x <= col + r; x++) {
             let cell = env.getCell(x,y)
-            if (r >= dist(dx,dy,x,y) && cell != undefined){
+            if (r >= dist(dx,dy,x,y) && cell != undefined) {
                 cell.player = bool;
                 if(bool == true) {
                     cell.distance = Number.POSITIVE_INFINITY
