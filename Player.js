@@ -18,7 +18,7 @@ class Player {
       this.x = constrain(this.dx, 0, env.FIELD_X - env.SCALE);
       this.y = constrain(this.dy, 0, env.FIELD_Y - env.SCALE);
 
-      this.getCellsInDistance(true,this.y,this.x)
+      this.getCellsInDistance(true,this.x,this.y)
     };
 
     this.show = function () {
@@ -27,28 +27,24 @@ class Player {
     };
 
     this.getCellsInDistance = function (bool, dx,dy) {
+      let current =  env.map[dy][dx];
+      current.player = bool;
+      
       let row = dy;
       let col = dx;
-      let r = env.SCALE;
+      let r = this.playerScale;
 
       for (let y = row - r; y <= row + r; y++) {
         for (let x = col - r; x <= col + r; x++) {
-        // ignoriere die aktuelle Zelle
-            if (y === 0 && x === 0) {
-                continue;
-            }
-
-            let cell = env.getCell(y,x)  
-            // müsste nicht hier der speed + random schon hinzugefügt werden ? 
-            if (r < dist(dx,dy,x,y) && cell != undefined){
+            let cell = env.getCell(x,y)
+            if (r >= dist(dx,dy,x,y) && cell != undefined){
                 cell.player = bool;
-                if(bool = true) {
-                  cell.distance = Number.POSITIVE_INFINITY
+                if(bool == true) {
+                    cell.distance = Number.POSITIVE_INFINITY
                 }
             }
         }
       }  
     };
-
   }
 }

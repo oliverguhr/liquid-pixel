@@ -2,10 +2,11 @@ class Environment {
     constructor() {
         this.FIELD_X = 800;
         this.FIELD_Y = 800;
-        this.PARTICLE_COUNT = 400;
+        this.PARTICLE_COUNT = 1000;
         this.SCALE = 4;
         this.SPEED = 8;
         this.map = Array.from({ length: this.FIELD_Y }, () => Array.from({ length: this.FIELD_X }, () => new Cell()));
+        
 
         this.player = new Player(this);
         this.particles = undefined;
@@ -19,6 +20,17 @@ class Environment {
 
             this.particles = particles;
         };
+
+        this.setXY= function () {
+            for (let row = 0; row < this.map.length; row++) {
+                const colmuns = this.map[row];
+                for (let col = 0; col < colmuns.length; col++) {                                        
+                    // calc dist from cell to mouse   
+                    colmuns[col].y = row;
+                    colmuns[col].x = col;
+                }
+            }
+        }
 
         this.update = function () {
             this.player.update();
@@ -42,7 +54,7 @@ class Environment {
                 const colmuns = this.map[row];
                 for (let col = 0; col < colmuns.length; col++) {                                        
                     // calc dist from cell to mouse   
-                    colmuns[col].distance = dist(this.player.x, this.player.y, row,col); 
+                    colmuns[col].distance = Math.floor(dist(this.player.x, this.player.y, row,col)); 
                 }
             }
         }

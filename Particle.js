@@ -21,7 +21,7 @@ class Particle {
 
               let cell = env.getCell(y,x); 
               // müsste nicht hier der speed + random schon hinzugefügt werden ? 
-              if (cell.distance <= min.distance){
+              if (cell != undefined && cell.distance <= min.distance){
                   min.distance = cell.distance;
                   this.xspeed = x - col;  
                   this.yspeed = y - row;  // leedcode lol
@@ -34,13 +34,13 @@ class Particle {
     this.update = function () {
       this.updateDirection(env.player.x, env.player.y)
       
-      env.map[this.x][this.y].particle = undefined;
+      env.map[this.y][this.x].particle = undefined;
 
       let dx = Math.floor(this.x + this.xspeed * env.SPEED * random(0.5,2));
       let dy = Math.floor(this.y + this.yspeed * env.SPEED * random(0.5,2));
 
-      let cell = env.getCell(dy,dx)  
-      if  (cell != undefined && cell.particle == undefined && cell.player == false) {
+      let cell = env.getCell(dx,dy)  
+      if  (cell != undefined && !cell.isBlocked()) {
         this.x = dx;
         this.y = dy;
       }
@@ -48,7 +48,7 @@ class Particle {
       this.x = constrain(this.x, 0, env.FIELD_X - env.SCALE);
       this.y = constrain(this.y, 0, env.FIELD_Y - env.SCALE);
 
-      env.map[this.x][this.y].particle = this;
+      env.map[this.y][this.x].particle = this;
     };
 
 
