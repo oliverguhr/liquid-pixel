@@ -21,7 +21,7 @@ class Particle {
 
               let cell = env.getCell(y,x); 
               // müsste nicht hier der speed + random schon hinzugefügt werden ? 
-              if (cell.distance < min.distance){
+              if (cell.distance <= min.distance){
                   min.distance = cell.distance;
                   this.xspeed = x - col;  
                   this.yspeed = y - row;  // leedcode lol
