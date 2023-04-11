@@ -2,65 +2,104 @@ class Environment {
     constructor() {
         this.FIELD_X = 800;
         this.FIELD_Y = 800;
-        this.PARTICLE_COUNT = 400;
+        this.PARTICLE_COUNT = 1000;
         this.SCALE = 4;
-        this.map = Array(this.FIELD_X, this.FIELD_X).fill(null).map(() => Array(this.FIELD_Y));
-        this.map_distance = Array(this.FIELD_X).fill(0.0).map(() => Array(this.FIELD_Y));
+        this.SPEED = 8;
+        this.running = false;
+        this.background = createGraphics(this.FIELD_X, this.FIELD_Y);
+        this.foreground = createGraphics(this.FIELD_X, this.FIELD_Y);
+        this.map = Array.from({ length: this.FIELD_Y }, () => Array.from({ length: this.FIELD_X }, () => new Cell()));
+        
+
         this.player = new Player(this);
+        this.particles = [];
+        this.obstracles = [];
 
         this.createParticles = function () {
             const particles = [];
 
             for (let i = 0; i < this.PARTICLE_COUNT; i++) {
-                particles.push(new Particle(this, this.FIELD_X / 2, this.FIELD_Y / 2));
+                particles.push(new Particle(this.FIELD_X / 2, this.FIELD_Y / 2));
             }
 
-            return particles;
+            this.particles = particles;
         };
-        this.particles = this.createParticles();
 
+        this.init= function () {
+            env.background.background(51);
+            env.background.noStroke();
+            env.foreground.background('rgba(0%, 100%, 0%, 50%)');
+
+
+            for (let row = 0; row < this.map.length; row++) {
+                const colmuns = this.map[row];
+                for (let col = 0; col < colmuns.length; col++) {                                        
+                    // calc dist from cell to mouse   
+                    colmuns[col].y = row;
+                    colmuns[col].x = col;
+                }
+            }
+        }
 
         this.update = function () {
             this.player.update();
             this.updateGradient();
             
             this.particles.forEach(p => {
-                p.updateDirection(this.player.x, this.player.y)
                 p.update();
             });
         };
 
         this.show = function () {
+            env.foreground.clear();
             this.player.show();
             this.particles.forEach(p => {
                 p.show();
             });
+
+            if(!this.running)
+            {
+                this.obstracles.forEach(o => {
+                    o.show();
+                });
+            }
         };
+
+        this.createObstracles = function () {
+            if (mouseIsPressed === true) {
+                let col = env.player.x;
+                let row  = env.player.y;
+                let r = this.player.playerScale;
+
+                new Obstracle(env, col, row);
+                
+                for (let y = row - r; y <= row + r; y++) {
+                    for (let x = col - r; x <= col + r; x++) {
+                        let cell = env.getCell(x,y)
+                        if (r >= dist(col,row,x,y) && cell != undefined) {
+                            new Obstracle(env, x,y);
+                        }
+                    }
+                }  
+            }
+        }
 
         this.updateGradient = function() {
             //iterate over all cells in map
-            for (let row = 0; row < this.map_distance.length; row++) {
-                const colmuns = this.map_distance[row];
+            for (let row = 0; row < this.map.length; row++) {
+                const colmuns = this.map[row];
                 for (let col = 0; col < colmuns.length; col++) {                                        
                     // calc dist from cell to mouse   
-                    colmuns[col] = dist(this.player.x, this.player.y, row,col); 
+                    colmuns[col].distance = Math.floor(dist(this.player.x, this.player.y, row,col)); 
                 }
             }
         }
 
-        this.getGradientFromCell = function(x,y) {
-            return this.get_cell(this.map_distance, x,y);
-        }
-
-        this.getStateFromCell = function(x,y) {
-            return this.get_cell(this.map, x,y);
-        }
-
-        this.get_cell = function(map,x,y) {
-            if(y > 0 && x > 0 && y < map.length && x < map[0].length){
-                return map[y][x];                
+        this.getCell = function(x,y) {
+            if(y > 0 && x > 0 && y < this.map.length && x < this.map[0].length){
+                return this.map[y][x];                
             }
-            return undefined;
+            return undefined; // should never happen
         }
     }
 }
