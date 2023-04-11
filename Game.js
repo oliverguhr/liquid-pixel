@@ -7,7 +7,7 @@ function setup() {
     button = createButton('spawn');
     button.position(20, 20);
     button.mousePressed(start);
-    // frameRate(24);
+    frameRate(30);
   }
   
   function draw() {
