@@ -1,5 +1,7 @@
 # liquid-pixel
 
+Fun implementation of Liquid War based on https://ufoot.org/liquidwar/v5/techinfo/algorithm
+
 ## ToDo's
 
 ### Must
