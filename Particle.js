@@ -4,27 +4,24 @@ class Particle {
     this.y = Math.floor(random(start_y, start_y + env.FIELD_Y * 0.1 - env.SCALE ));
     this.xspeed = 0;
     this.yspeed = 0;
-    env.map[this.x][this.y].particle = this;
+    env.map[this.y][this.x].particle = this;
     
-    this.updateDirection = function () {
+    this.updateDirection = function (col,row) {
       //schau dir alle zellen in der umgebung an und finde die Zelle mit den niedrigsten wert
-      let row = this.y;
-      let col = this.x;
       let min = {distance : Number.POSITIVE_INFINITY}
 
-      for (let y = row - 1; y <= row + 1; y++) {
-          for (let x = col - 1; x <= col + 1; x++) {
+      for (let dr = row - 1; dr <= row + 1; dr++) {
+          for (let dc = col - 1; dc <= col + 1; dc++) {
           // ignoriere die aktuelle Zelle
-              if (y === 0 && x === 0) {
+              if (row === 0 && col === 0) {
                   continue;
               }
 
-              let cell = env.getCell(y,x); 
-              // müsste nicht hier der speed + random schon hinzugefügt werden ? 
-              if (cell != undefined && cell.distance <= min.distance){
+              let cell = env.getCell(dr,dc); 
+              if (cell != undefined && cell.distance < min.distance){
                   min.distance = cell.distance;
-                  this.xspeed = x - col;  
-                  this.yspeed = y - row;  // leedcode lol
+                  this.xspeed = dc - col;  
+                  this.yspeed = dr - row;  // leedcode lol
               }
           }
       }
@@ -32,27 +29,23 @@ class Particle {
 
 
     this.update = function () {
-      this.updateDirection(env.player.x, env.player.y)
+      this.updateDirection(this.x, this.y)
       
       env.map[this.y][this.x].particle = undefined;
 
       let dx = Math.floor(this.x + this.xspeed * env.SPEED * random(0.5,2));
       let dy = Math.floor(this.y + this.yspeed * env.SPEED * random(0.5,2));
 
-      let cell = env.getCell(dx,dy)  
-      if  (cell != undefined && !cell.isBlocked()) {
+      dx = constrain(dx, 0, env.FIELD_X - env.SCALE);
+      dy = constrain(dy, 0, env.FIELD_Y - env.SCALE);
+
+      let cell = env.getCell(dy,dx)  
+      if(cell != undefined && !cell.isBlocked()) {
         this.x = dx;
         this.y = dy;
+        cell.particle = this;
       }
-
-      this.x = constrain(this.x, 0, env.FIELD_X - env.SCALE);
-      this.y = constrain(this.y, 0, env.FIELD_Y - env.SCALE);
-
-      env.map[this.y][this.x].particle = this;
     };
-
-
-
 
     this.show = function () {
       env.foreground.fill('white');

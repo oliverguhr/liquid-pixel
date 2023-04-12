@@ -2,10 +2,11 @@ class Environment {
     constructor() {
         this.FIELD_X = 800;
         this.FIELD_Y = 800;
-        this.PARTICLE_COUNT = 1000;
+        this.PARTICLE_COUNT = 1;
         this.SCALE = 4;
         this.SPEED = 8;
         this.running = false;
+        this.frame = 0;
         this.background = createGraphics(this.FIELD_X, this.FIELD_Y);
         this.foreground = createGraphics(this.FIELD_X, this.FIELD_Y);
         this.map = Array.from({ length: this.FIELD_Y }, () => Array.from({ length: this.FIELD_X }, () => new Cell()));
@@ -28,7 +29,7 @@ class Environment {
         this.init= function () {
             env.background.background(51);
             env.background.noStroke();
-            env.foreground.background('rgba(0%, 100%, 0%, 50%)');
+            env.foreground.background('rgba(0%, 0%, 0%, 0%)');
 
 
             for (let row = 0; row < this.map.length; row++) {
@@ -41,9 +42,15 @@ class Environment {
             }
         }
 
-        this.update = function () {
+        this.update = async function () {
             this.player.update();
-            this.updateGradient();
+            if(this.frame == 0 && this.running) {
+                //let lastPrint = millis()
+                await this.updateGradient();
+                //console.log("Gradient calculation time: " + str(millis() - lastPrint));
+                this.frame = 7;
+            }
+            this.frame = this.frame - 1;
             
             this.particles.forEach(p => {
                 p.update();
@@ -65,41 +72,75 @@ class Environment {
             }
         };
 
+        this.drawGradient = async function () {
+            let lastPrint = millis()
+            await this.updateGradient();
+            console.log("Gradient calculation time: " + str(millis() - lastPrint));
+            var cells = this.map.flat();
+            let m = 1000; // call stack exeeded-->  Math.max(...cells.map(a => a.distance));
+            for (let index = 0; index < cells.length; index = index + 10) {
+                
+                env.background.fill(255, 0, 0, Math.floor(255 / m * cells[index].distance));
+                env.background.circle(cells[index].x, cells[index].y, 1);
+            }
+        }
+
         this.createObstracles = function () {
             if (mouseIsPressed === true) {
                 let col = env.player.x;
                 let row  = env.player.y;
                 let r = this.player.playerScale;
-
-                new Obstracle(env, col, row);
                 
-                for (let y = row - r; y <= row + r; y++) {
-                    for (let x = col - r; x <= col + r; x++) {
-                        let cell = env.getCell(x,y)
-                        if (r >= dist(col,row,x,y) && cell != undefined) {
-                            new Obstracle(env, x,y);
+                for (let dr = row - r; dr <= row + r; dr++) {
+                    for (let dc = col - r; dc <= col + r; dc++) {
+                        let cell = env.getCell(dr,dc)
+                        if (r >= dist(col,row,dc,dr) && cell != undefined) {
+                            new Obstracle(env, dc,dr);
                         }
                     }
                 }  
             }
         }
 
-        this.updateGradient = function() {
-            //iterate over all cells in map
-            for (let row = 0; row < this.map.length; row++) {
-                const colmuns = this.map[row];
-                for (let col = 0; col < colmuns.length; col++) {                                        
-                    // calc dist from cell to mouse   
-                    colmuns[col].distance = Math.floor(dist(this.player.x, this.player.y, row,col)); 
+        this.updateGradient = function() { new Promise(() => {
+                const visited = new Array(this.map.length).fill(false).map(() => new Array(this.map[0].length).fill(false));
+                const queue = [{ row: this.player.y, col: this.player.x, level: 0 }];
+                let lastRow = this.player.y;
+                let lastCol = this.player.x;
+
+                while (queue.length > 0) {
+                    const { row, col, level } = queue.shift();
+                    this.map[row][col].distance = level;
+                    lastRow = row;
+                    lastCol = col;
+                    // add neighboring cells to queue   
+                    for (let dr = row - 1; dr <= row + 1; dr++) {
+                        for (let dc = col -1; dc <= col + 1; dc++) {
+
+                            if (this.isValidCell(dr,dc) && !visited[dr][dc]) {
+                                let d = level + dist(lastCol,lastRow,dc,dr);
+                                queue.push({ row: dr, col: dc, level: d });
+                                visited[dr][dc] = true;
+                            }
+                        }
+                    }
+                
                 }
-            }
+            });
         }
 
-        this.getCell = function(x,y) {
-            if(y > 0 && x > 0 && y < this.map.length && x < this.map[0].length){
-                return this.map[y][x];                
+        this.isValidCell = function(row,col) {
+            if(row > 0 && col > 0 && row < this.map.length && col < this.map[0].length && !this.map[row][col].obstracle){
+                return true;                
             }
-            return undefined; // should never happen
+            return false;
+        }
+
+        this.getCell = function(row,col) {
+            if(row > 0 && col > 0 && row < this.map.length && col < this.map[0].length){
+                return this.map[row][col];                
+            }
+            return undefined;
         }
     }
 }

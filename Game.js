@@ -7,7 +7,8 @@ function setup() {
     button = createButton('spawn');
     button.position(20, 20);
     button.mousePressed(start);
-    // frameRate(24);
+
+    frameRate(30);
   }
   
   function draw() {
@@ -22,20 +23,24 @@ function setup() {
 
   function start() {
     env.running = true;
+    env.frame = 0;
     env.createParticles();
   }
-
   
+  function doubleClicked() {
+    env.drawGradient();
+  }
+
   function mouseDragged() {
-    // ellipse(mouseX, mouseY, 5, 5);
-    // prevent default
     env.player.pos();
     env.createObstracles();
+    // prevent default
     return false;
   }
   
   function mouseMoved() {
       env.player.pos();
+      // console.log(env.map[env.player.y][env.player.y]);
   }  
   // beispiel für key Mappings
   function keyPressed() {

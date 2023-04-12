@@ -26,22 +26,16 @@ class Player {
       env.foreground.circle(this.x, this.y,  this.playerScale);
     };
 
-    this.getCellsInDistance = function (bool, dx,dy) {
-      let current =  env.map[dy][dx];
-      current.player = bool;
+    this.getCellsInDistance = function (bool, col, row) {
       
-      let row = dy;
-      let col = dx;
+      env.map[row][col].player = bool;
       let r = this.playerScale;
 
       for (let y = row - r; y <= row + r; y++) {
         for (let x = col - r; x <= col + r; x++) {
             let cell = env.getCell(x,y)
-            if (r >= dist(dx,dy,x,y) && cell != undefined) {
+            if (r >= dist(col,row,x,y) && cell != undefined) {
                 cell.player = bool;
-                if(bool == true) {
-                    cell.distance = Number.POSITIVE_INFINITY
-                }
             }
         }
       }  
