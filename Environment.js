@@ -4,7 +4,7 @@ class Environment {
         this.FIELD_Y = 800;
         this.PARTICLE_COUNT = 1;
         this.SCALE = 4;
-        this.SPEED = 8;
+        this.SPEED = 10;
         this.running = false;
         this.frame = 0;
         this.background = createGraphics(this.FIELD_X, this.FIELD_Y);
@@ -42,13 +42,13 @@ class Environment {
             }
         }
 
-        this.update = async function () {
+        this.update = function () {
             this.player.update();
             if(this.frame == 0 && this.running) {
                 //let lastPrint = millis()
-                await this.updateGradient();
+                this.updateGradient();
                 //console.log("Gradient calculation time: " + str(millis() - lastPrint));
-                this.frame = 7;
+                this.frame = 5;
             }
             this.frame = this.frame - 1;
             
@@ -72,9 +72,9 @@ class Environment {
             }
         };
 
-        this.drawGradient = async function () {
-            let lastPrint = millis()
-            await this.updateGradient();
+        this.drawGradient = function () {
+            let lastPrint = millis();
+            this.updateGradient();
             console.log("Gradient calculation time: " + str(millis() - lastPrint));
             var cells = this.map.flat();
             let m = 1000; // call stack exeeded-->  Math.max(...cells.map(a => a.distance));
@@ -102,31 +102,29 @@ class Environment {
             }
         }
 
-        this.updateGradient = function() { new Promise(() => {
-                const visited = new Array(this.map.length).fill(false).map(() => new Array(this.map[0].length).fill(false));
-                const queue = [{ row: this.player.y, col: this.player.x, level: 0 }];
-                let lastRow = this.player.y;
-                let lastCol = this.player.x;
+        this.updateGradient = function() { 
+            const visited = new Array(this.map.length).fill(false).map(() => new Array(this.map[0].length).fill(false));
+            const queue = [{ row: this.player.y, col: this.player.x, level: 0 }];
+            let lastRow = this.player.y;
+            let lastCol = this.player.x;
 
-                while (queue.length > 0) {
-                    const { row, col, level } = queue.shift();
-                    this.map[row][col].distance = level;
-                    lastRow = row;
-                    lastCol = col;
-                    // add neighboring cells to queue   
-                    for (let dr = row - 1; dr <= row + 1; dr++) {
-                        for (let dc = col -1; dc <= col + 1; dc++) {
+            while (queue.length > 0) {
+                const { row, col, level } = queue.shift();
+                this.map[row][col].distance = level;
+                lastRow = row;
+                lastCol = col;
+                // "Neumann Nachbarschaft". sollte ausreichen für die Gradientenberechnung. 
+                for (let dr = row - 1; dr <= row + 1; dr = dr +2) {
+                    for (let dc = col -1; dc <= col + 1; dc = dc +2) {
 
-                            if (this.isValidCell(dr,dc) && !visited[dr][dc]) {
-                                let d = level + dist(lastCol,lastRow,dc,dr);
-                                queue.push({ row: dr, col: dc, level: d });
-                                visited[dr][dc] = true;
-                            }
+                        if (this.isValidCell(dr,dc) && !visited[dr][dc]) {
+                            let d = level + dist(lastCol,lastRow,dc,dr);
+                            queue.push({ row: dr, col: dc, level: d });
+                            visited[dr][dc] = true;
                         }
                     }
-                
                 }
-            });
+            }
         }
 
         this.isValidCell = function(row,col) {

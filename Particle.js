@@ -33,8 +33,8 @@ class Particle {
       
       env.map[this.y][this.x].particle = undefined;
 
-      let dx = Math.floor(this.x + this.xspeed * env.SPEED * random(0.5,2));
-      let dy = Math.floor(this.y + this.yspeed * env.SPEED * random(0.5,2));
+      let dx = Math.floor(this.x + this.xspeed * env.SPEED);// * random(0.2,1));
+      let dy = Math.floor(this.y + this.yspeed * env.SPEED);// * random(0.2,1));
 
       dx = constrain(dx, 0, env.FIELD_X - env.SCALE);
       dy = constrain(dy, 0, env.FIELD_Y - env.SCALE);
