@@ -4,7 +4,8 @@ class Particle {
     this.y = Math.floor(random(start_y, start_y + env.FIELD_Y * 0.1 - env.SCALE ));
     this.xspeed = 0;
     this.yspeed = 0;
-    env.map[this.x][this.y].particle = this;
+    // place particle on the current cell
+    env.map[this.y][this.x].particle = this;
     
     this.updateDirection = function () {
       //schau dir alle zellen in der umgebung an und finde die Zelle mit den niedrigsten wert
@@ -13,13 +14,13 @@ class Particle {
       let min = {distance : Number.POSITIVE_INFINITY}
 
       for (let y = row - 1; y <= row + 1; y++) {
-          for (let x = col - 1; x <= col + 1; x++) {
-          // ignoriere die aktuelle Zelle
-              if (y === 0 && x === 0) {
-                  continue;
-              }
+        for (let x = col - 1; x <= col + 1; x++) {
+            // ignoriere die aktuelle Zelle
+                if (y === row && x === col) {
+                    continue;
+                }
 
-              let cell = env.getCell(y,x); 
+                let cell = env.getCell(x, y);
               // müsste nicht hier der speed + random schon hinzugefügt werden ? 
               if (cell != undefined && cell.distance <= min.distance){
                   min.distance = cell.distance;
