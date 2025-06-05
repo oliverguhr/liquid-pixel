@@ -1,0 +1,16 @@
+{
+  "name": "liquid-pixel",
+  "version": "1.0.0",
+  "description": "Fun implementation of Liquid War based on https://ufoot.org/liquidwar/v5/techinfo/algorithm",
+  "main": "Cell.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

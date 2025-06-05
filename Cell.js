@@ -12,3 +12,7 @@ class Cell {
         }
     }
 }
+
+if (typeof module !== "undefined") {
+    module.exports = Cell;
+}
