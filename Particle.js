@@ -60,3 +60,6 @@ class Particle {
     };
   }
 }
+if (typeof module !== "undefined") {
+    module.exports = Particle;
+}
