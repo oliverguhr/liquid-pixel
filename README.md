@@ -6,9 +6,9 @@ Fun implementation of Liquid War based on https://ufoot.org/liquidwar/v5/techinf
 
 ### Must
 
-- [x] obstracle detection
+ - [x] obstacle detection
 - [x] prevent Movement on blocking cell
-- [x] obstracle Creation by Mouse drag
+ - [x] obstacle Creation by Mouse drag
 - [ ] Create an enemy swarm
 - [ ] Let the pixels eat each other
 
