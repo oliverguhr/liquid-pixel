@@ -30,7 +30,7 @@ function setup() {
     // ellipse(mouseX, mouseY, 5, 5);
     // prevent default
     env.player.pos();
-    env.createObstracles();
+    env.createObstacles();
     return false;
   }
   

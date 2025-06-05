@@ -13,7 +13,7 @@ class Environment {
 
         this.player = new Player(this);
         this.particles = [];
-        this.obstracles = [];
+        this.obstacles = [];
 
         this.createParticles = function () {
             const particles = [];
@@ -59,25 +59,25 @@ class Environment {
 
             if(!this.running)
             {
-                this.obstracles.forEach(o => {
+                this.obstacles.forEach(o => {
                     o.show();
                 });
             }
         };
 
-        this.createObstracles = function () {
+        this.createObstacles = function () {
             if (mouseIsPressed === true) {
                 let col = env.player.x;
                 let row  = env.player.y;
                 let r = this.player.playerScale;
 
-                new Obstracle(env, col, row);
+                new Obstacle(env, col, row);
                 
                 for (let y = row - r; y <= row + r; y++) {
                     for (let x = col - r; x <= col + r; x++) {
                         let cell = env.getCell(x,y)
                         if (r >= dist(col,row,x,y) && cell != undefined) {
-                            new Obstracle(env, x,y);
+                            new Obstacle(env, x,y);
                         }
                     }
                 }  
