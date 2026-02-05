@@ -90,7 +90,7 @@ class Environment {
                 const colmuns = this.map[row];
                 for (let col = 0; col < colmuns.length; col++) {                                        
                     // calc dist from cell to mouse   
-                    colmuns[col].distance = Math.floor(dist(this.player.x, this.player.y, row,col)); 
+                    colmuns[col].distance = Math.floor(dist(this.player.x, this.player.y, col, row)); 
                 }
             }
         }
