@@ -160,6 +160,25 @@ Aufnahmen: `artifacts/multiplayer-preview/`; Ablauf und Grenzen:
 Der Nutzer hat am 8. November 2026 bestätigt, dass der neue Server bei ihm
 startet. Ein zuvor von uns gestarteter Spielserver wurde dafür beendet.
 
+## Zufällige Mehrspielerkarten
+
+- [x] Hindernisse deterministisch aus dem Match-Seed erzeugen, damit beide
+  Clients dieselbe Karte erhalten.
+- [x] Spiegelbildliches Gelände, freie Startbereiche und durchgehend
+  verbundene begehbare Bereiche absichern.
+- [x] Reproduzierbarkeit, unterschiedliche Seeds, kleine Karten sowie
+  vollständige 1.000er-Schwärme über 30 Seeds prüfen.
+- [x] Zufallskarten im echten Match und browserübergreifend auf gleiche
+  Zustände und vollständige Übernahme prüfen.
+
+Geprüft: 59 Modell-/Serverprüfungen und acht Mehrspieler-Browserfälle grün.
+Die laufende Aufnahme mit Seed 123 zeigt 2.820 identische Hinderniszellen
+auf beiden Clients und einen vollständig synchronen Spielabschluss.
+Vorschau: `artifacts/multiplayer-preview/random-terrain.png`.
+
+Der Nutzer hat den Test im lokalen Netzwerk auf zwei Computern am
+8. November 2026 als funktionierend bestätigt.
+
 ## Spätere Aufgaben
 
 - [ ] Performance erst bei konkretem Bedarf messen und Ziele vereinbaren.

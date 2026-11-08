@@ -75,6 +75,29 @@ Prüfsummen. Die normale Spiellogik aus `Environment.js` wird wiederverwendet.
 Der Server lädt lediglich Versions- und Konfigurationsvorgaben; er erzeugt
 oder aktualisiert keine Spielwelt.
 
+## Zufällige Hindernisse
+
+Jedes neue Match erzeugt über `MatchTerrain.js` eine Hinderniskarte aus dem
+gemeinsamen Seed. Ein eigener deterministischer Zufallsstrom bestimmt Position,
+Größe und Form der Hindernisse. Auf der normalen 800×800-Karte werden bis zu
+sechs spiegelbildliche Paare aus ovalen und abgeschrägten Blöcken platziert.
+Die Spiegelachse liegt zwischen den beiden Startzielen, damit keine Seite
+einen zufälligen Geländevorteil erhält.
+
+Die Startbereiche bleiben großzügig frei. Zwischen getrennten Hindernissen
+bleiben mindestens zwei Zellen Platz, außerdem ein freier Randstreifen.
+Jedes neue Paar wird vor der Übernahme per Vier-Wege-Flutfüllung geprüft:
+Alle freien Zellen müssen weiterhin zusammenhängend sein. Andernfalls wird
+das Paar verworfen. Die Suche nach Platz ist begrenzt; auf kleinen oder
+dicht belegten Testwelten können deshalb weniger oder keine Hindernisse
+entstehen. Es werden keine Partikel verschoben oder gelöscht, um Hindernisse
+einzusetzen; die Karte entsteht vor dem Spawn.
+
+Beide Clients erzeugen dieselbe Karte und nehmen ihre Hindernisse in die
+Zustandsprüfsumme auf. Die Protokollversion ist jetzt
+`liquid-pixel-lockstep-2`; nach dieser Änderung sind ein Serverneustart und
+ein Neuladen beider Browser erforderlich.
+
 ## Protokoll und Takt
 
 `scripts/multiplayer.cjs` bindet WebSocket an `/socket` desselben HTTP-Servers.
@@ -178,16 +201,24 @@ beide vollständigen Endzustände liegen in `artifacts/multiplayer-preview/`.
 
 Am 8. November 2026 bestanden:
 
-- `npm test -- --runInBand`: **52 Tests**, einschließlich 17 neuer Modell-
-  und WebSocket-Prüfungen.
-- `npm run test:browser`: **44 Prüfungen**, einschließlich acht neuer Fälle
-  zum Mehrspielermodus. Keine übersprungenen oder erwarteten Fehlschläge.
+- `npm test -- --runInBand`: **59 Modell-, WebSocket- und Kartenprüfungen**.
+  Die sieben neuen Kartentests prüfen unter anderem 30 Seeds auf Symmetrie,
+  freie Startzonen, vollständige Belegung und verbundene freie Zellen sowie
+  kleine Karten und begrenztes Verhalten bei ungültigen oder übergroßen Anfragen.
+- `npm run test:browser -- multiplayer.spec.js`: **acht Prüfungen** mit den
+  neuen Kartenregeln. Die vollständigen 44 Browserprüfungen waren vor dem
+  Hinzufügen der Zufallskarten grün. Keine übersprungenen oder erwarteten
+  Fehlschläge.
 - `npm run play:multiplayer`: zwei normale Sitzungen ohne Debug-Harness.
-  Beide meldeten nach vollständiger Übernahme Schritt **558**, Teamzahlen
-  **2.000 : 0** und Prüfsumme **`50d09cc1daff87a5`**. Zusätzlich wurden ihre
+  Beide erzeugten bei Seed 123 dieselben **2.820 Hinderniszellen** und meldeten
+  nach vollständiger Übernahme Schritt **573**, Teamzahlen **2.000 : 0** und
+  Prüfsumme **`22452aba3026ccd6`**. Zusätzlich wurden ihre
   vollständigen Endzustände direkt verglichen. Beide kehrten in die Lobby
   zurück; es gab keine JavaScript-Laufzeitfehler.
 - JavaScript-Syntax, lokale Dokumentationslinks und `git diff --check` geprüft.
+
+Der Nutzer hat außerdem den Test im lokalen Netzwerk auf zwei Computern
+am 8. November 2026 als funktionierend bestätigt.
 
 Die Aufnahmen `player-1.webm` und `player-2.webm` zeigen den laufenden Ablauf.
 Die gespeicherten Ansichten zeigen Desktop- und mobile Lobby sowie beide

@@ -1,8 +1,9 @@
 const MatchEnvironment = typeof module !== 'undefined' ? require('./Environment') : Environment;
 const MatchMath = typeof module !== 'undefined' ? require('./Determinism') : Determinism;
+const MatchMap = typeof module !== 'undefined' ? require('./MatchTerrain') : MatchTerrain;
 
 const MatchSimulation = (() => {
-  const VERSION = 'liquid-pixel-lockstep-1';
+  const VERSION = 'liquid-pixel-lockstep-2';
   const defaults = Object.freeze({ version: VERSION, width: 800, height: 800, scale: 4,
     speed: 8, particleCount: 1000, seed: 1 });
 
@@ -17,10 +18,11 @@ const MatchSimulation = (() => {
       const y = Math.floor(env.FIELD_Y / 2 / env.SCALE) * env.SCALE;
       team.player.setTarget(x, y);
       team.player.update();
-      env.spawnSwarm(team.id, config.particleCount, x, y);
     });
+    MatchMap.generate(env, config.seed, config.particleCount);
+    env.teams.forEach(team => env.spawnSwarm(team.id, config.particleCount, team.player.x, team.player.y));
     env.spawnInfo = { requested: config.particleCount * 2, spawned: env.particles.length,
-      available: env.cells.length };
+      available: env.cells.length - env.obstacles.length };
     return env;
   }
 

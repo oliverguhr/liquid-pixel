@@ -68,6 +68,11 @@ test('two actual players move both teams, stay identical, finish by capture and 
   await expect(pages[1].locator('#your-team')).toHaveText('Du spielst Rot');
   const initial = await matchingCheckpoint(...pages);
   expect(initial[0].state.particles).toHaveLength(2000);
+  expect(initial[0].state.obstacles.length).toBeGreaterThan(500);
+  expect(initial[0].state.obstacles).toEqual(initial[1].state.obstacles);
+  await expect(pages[0].locator('#map-label')).toHaveText('Zufallskarte');
+  await expect(pages[1].locator('#map-label')).toHaveText('Zufallskarte');
+  await pages[0].screenshot({ path: testInfo.outputPath('random-terrain.png'), fullPage: true });
   await moveTarget(pages[0], 224, 300);
   await moveTarget(pages[1], 576, 500);
   // The second pointer may arrive well after the first: measure from applied inputs.

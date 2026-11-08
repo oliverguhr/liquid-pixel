@@ -106,7 +106,8 @@ function syncUI() {
   document.querySelector('#pause-label').textContent = manualStepping ? 'Resume' : 'Pause';
   document.querySelector('#pause-icon').setAttribute('href', manualStepping ? '#icon-play' : '#icon-pause');
   document.querySelector('#pause-button').setAttribute('aria-pressed', String(manualStepping));
-  document.querySelector('#map-label').textContent = env.obstacles.length ? 'Custom terrain' : 'Open field';
+  document.querySelector('#map-label').textContent = env.obstacles.length
+    ? multiplayer ? 'Zufallskarte' : 'Custom terrain' : 'Open field';
   document.querySelector('#spawn-note').textContent = env.particles.length ? 'Replaces your current swarm.' : 'Start with 1,000 little explorers.';
   document.querySelector('#mode-name').textContent = multiplayer
     ? multiplayer.phase === 'match' ? 'Online-Match' : 'Lobby' : capture ? 'Capture challenge' : 'Free play';

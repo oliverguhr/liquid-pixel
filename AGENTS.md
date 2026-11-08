@@ -63,6 +63,10 @@ stabilen Singleplayer ausgearbeitet.
   Match-Start und kanonische Zustandsberichte. Änderungen an spielentscheidenden
   Regeln müssen die gemeinsame Protokollversion berücksichtigen und auf
   Chromium, Firefox, WebKit und Node identische Zustände ergeben.
+- `MatchTerrain.js` erzeugt vor dem Online-Spawn gespiegelt zufälliges Gelände
+  aus dem Match-Seed. Startbereiche bleiben frei, alle freien Zellen müssen
+  zusammenhängend bleiben. Änderungen am Generator erfordern dieselbe
+  Protokoll- und Browserprüfung wie Änderungen an der Simulation.
 - `Multiplayer.js` simuliert das gesamte Online-Match auf jedem Client.
   `scripts/multiplayer.cjs` verwaltet Lobby und verteilt nummerierte Eingaben;
   er soll keine laufende Partikelsimulation übernehmen. Details und Grenzen

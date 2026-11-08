@@ -33,7 +33,10 @@ calculate particle movement or stream particle positions. See the
 The existing singleplayer playground remains at
 http://127.0.0.1:4173/playground. Click `Spawn swarm`, move the mouse to steer,
 and drag to paint obstacles. Terrain editing and local Pause/Resume belong to
-the playground. Online matches start on the same open field for both players.
+the playground. Each online match generates a new obstacle map from its shared
+seed. Both clients get exactly the same terrain. Mirrored obstacles give both
+teams the same layout; start areas stay clear and all free cells remain connected.
+Restart the server and reload both clients after updating to these map rules.
 p5.js is installed locally, so the game needs no CDN after installation.
 
 The responsive interface has a live unit count, Pause/Resume and Clear terrain

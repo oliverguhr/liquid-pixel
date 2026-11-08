@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '..');
 const files = new Set([
   '/index.html', '/style.css', '/Game.js', '/Renderer.js', '/Harness.js', '/Environment.js',
   '/Cell.js', '/Player.js', '/Particle.js', '/Obstacle.js',
-  '/Determinism.js', '/MatchSimulation.js', '/Multiplayer.js',
+  '/Determinism.js', '/MatchTerrain.js', '/MatchSimulation.js', '/Multiplayer.js',
   '/node_modules/p5/lib/p5.min.js',
 ]);
 const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript' };

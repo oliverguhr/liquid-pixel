@@ -38,6 +38,11 @@ async function main() {
     for (const page of pages) await page.waitForFunction(() => multiplayer.phase === 'match');
     const blue = await pages[0].evaluate(() => multiplayer.team) === 0 ? pages[0] : pages[1];
     const red = blue === pages[0] ? pages[1] : pages[0];
+    const maps = await Promise.all(pages.map(page => page.evaluate(() =>
+      env.obstacles.map(({ x, y }) => [x, y]).sort((a, b) => a[1] - b[1] || a[0] - b[0]))));
+    assert(maps[0].length > 500);
+    assert.deepEqual(maps[0], maps[1]);
+    await blue.screenshot({ path: path.join(output, 'random-terrain.png'), fullPage: true });
     await moveTarget(blue, 576, 400);
     await blue.waitForFunction(() => env.combatStats.conversions >= 40);
     await blue.screenshot({ path: path.join(output, 'blue-contact.png'), fullPage: true });
