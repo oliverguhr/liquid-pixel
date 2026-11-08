@@ -55,6 +55,19 @@ stabilen Singleplayer ausgearbeitet.
   Darstellung, Teamzahlen und Harness-Zustand widerspiegeln.
 - `Harness.js`: optionale Browsersteuerung über `window.gameHarness` bei
   einer URL mit `?debug&seed=123`.
+- `/` ist die Online-Lobby; `/playground` bleibt der lokale Singleplayer.
+  `?debug` öffnet ebenfalls den pausierten Singleplayer. `?online&debug` nutzt
+  die echte Lobby mit lesbaren Online-Diagnosen; lokale Simulationsschritte
+  oder Änderungen am Match über die Harness sind dort nicht erlaubt.
+- `Determinism.js` und `MatchSimulation.js` definieren portable Rechenregeln,
+  Match-Start und kanonische Zustandsberichte. Änderungen an spielentscheidenden
+  Regeln müssen die gemeinsame Protokollversion berücksichtigen und auf
+  Chromium, Firefox, WebKit und Node identische Zustände ergeben.
+- `Multiplayer.js` simuliert das gesamte Online-Match auf jedem Client.
+  `scripts/multiplayer.cjs` verwaltet Lobby und verteilt nummerierte Eingaben;
+  er soll keine laufende Partikelsimulation übernehmen. Details und Grenzen
+  stehen in `docs/multiplayer-design.md`. Vorhandene Zustände bei abweichenden
+  Prüfsummen nicht durch ungeprüfte Snapshots eines Clients ersetzen.
 - `scripts/serve.cjs`: lokaler Server; `scripts/play.cjs`: reproduzierbarer
   Browserlauf mit echten Mausereignissen, Bildern und Zustandsdateien.
 - `Renderer.js`: normale HiDPI-Darstellung mit zwischengespeicherten Effekten;
@@ -106,13 +119,14 @@ nicht abschwächen, um eine Änderung durchzubekommen.
 
 ## Ausführen und Prüfen
 
-Voraussetzungen: Node.js ab Version 22, npm und Playwright-Chromium. Vor dem
+Voraussetzungen: Node.js ab Version 22, npm sowie Playwright-Chromium,
+Firefox und WebKit für die vollständigen Browserprüfungen. Vor dem
 Einrichten prüfen, welche Werkzeuge und Abhängigkeiten bereits vorhanden
 sind. Die vollständigen Startanweisungen stehen in der `README.md`.
 
 ```bash
 npm ci
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm start                 # http://127.0.0.1:4173
 npm test -- --runInBand    # Unit-Tests
 npm run test:browser       # Browser-Tests
@@ -120,6 +134,7 @@ npm run test:all           # Beide Testsuiten
 npm run play:agent         # Reproduzierbares Wandszenario
 npm run play:preview       # Tatsächliche Animation als Video
 npm run play:capture       # Laufende Gegnerübernahme mit Zustandsnachweisen
+npm run play:multiplayer   # Zwei normale Sitzungen bis zum Sieg und zurück
 ```
 
 Der Browserlauf schreibt nach `artifacts/agent-play/`; Playwright schreibt

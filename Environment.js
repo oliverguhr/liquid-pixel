@@ -2,6 +2,7 @@ const EnvironmentCell = typeof module !== 'undefined' ? require('./Cell') : Cell
 const EnvironmentPlayer = typeof module !== 'undefined' ? require('./Player') : Player;
 const EnvironmentParticle = typeof module !== 'undefined' ? require('./Particle') : Particle;
 const EnvironmentObstacle = typeof module !== 'undefined' ? require('./Obstacle') : Obstacle;
+const EnvironmentMath = typeof module !== 'undefined' ? require('./Determinism') : Determinism;
 
 // Integer costs: ten for an axis step, fourteen for a diagonal.
 class NavigationQueue {
@@ -239,7 +240,7 @@ class Environment {
         const dx = Math.abs(cell.x - goal.x) / this.SCALE;
         const dy = Math.abs(cell.y - goal.y) / this.SCALE;
         const directGridDistance = Math.max(dx, dy) * 10 + Math.min(dx, dy) * 4;
-        potentials[cell.index] = (distances[cell.index] - directGridDistance) * 100 + Math.round(Math.hypot(dx, dy) * 1000);
+        potentials[cell.index] = (distances[cell.index] - directGridDistance) * 100 + EnvironmentMath.distance(dx, dy);
       }
     }
     // Preserve the public primary-team field used by navigation diagnostics.
@@ -352,14 +353,14 @@ class Environment {
       const order = this.particles.filter(particle => particle.credit >= 10);
       const band = particle => Math.floor((this.teams[particle.team].potential[this.getCell(particle.x, particle.y).index] + this.tick * 177 % 2000) / 2000);
       const priority = particle => Math.imul((particle.id + 1) ^ Math.imul(this.tick + round + 1, 374761393), 668265263) >>> 0;
-      order.sort((a, b) => band(a) - band(b) || priority(a) - priority(b));
+      order.sort((a, b) => band(a) - band(b) || priority(a) - priority(b) || a.id - b.id);
       for (const particle of order) if (particle.update()) moved.add(particle);
     }
     // Newly captured units start acting for their new team on the next half-step.
     if (activeTeams.size > 1 || this.particles.some(particle => particle.health < this.combat.maxHealth)) {
       const order = this.particles.filter(particle => (this.tick + particle.id) % 2 === 0 && !moved.has(particle));
       const priority = particle => Math.imul((particle.id + 1) ^ Math.imul(this.tick + 1, 374761393), 668265263) >>> 0;
-      order.sort((a, b) => priority(a) - priority(b));
+      order.sort((a, b) => priority(a) - priority(b) || a.id - b.id);
       for (const particle of order) if (particle.convertedAt !== this.tick) this.resolveContact(particle);
     }
     for (const particle of this.particles) particle.credit = Math.min(13, particle.credit);

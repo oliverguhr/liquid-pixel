@@ -10,14 +10,16 @@
     "test:all": "npm test -- --runInBand && npm run test:browser",
     "play:agent": "node scripts/play.cjs",
     "play:preview": "node scripts/preview-swarm.cjs",
-    "play:capture": "node scripts/preview-capture.cjs"
+    "play:capture": "node scripts/preview-capture.cjs",
+    "play:multiplayer": "node scripts/preview-multiplayer.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "p5": "1.6.0"
+    "p5": "1.6.0",
+    "ws": "^8.22.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",

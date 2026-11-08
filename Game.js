@@ -6,6 +6,10 @@ let paintFrom = null;
 let painting = false;
 let activePointer = null;
 let uiState = '';
+let multiplayer = null;
+let resultTimer;
+const gameParams = new URLSearchParams(window.location.search);
+const soloMode = location.pathname === '/playground' || gameParams.has('debug') && !gameParams.has('online');
 
 function renderingDensity() {
   return Math.max(2, Math.min(3, window.devicePixelRatio || 1));
@@ -29,17 +33,53 @@ function setup() {
     env.clearObstacles();
     renderGame();
   });
+  document.querySelector('#game-view').hidden = !soloMode;
+  document.querySelector('#lobby-view').hidden = soloMode;
+  document.querySelector('#pause-button').hidden = !soloMode;
+  if (!soloMode) {
+    manualStepping = false;
+    document.querySelector('#playground-title').textContent = 'Dein Schwarm. Dein Spiel.';
+    document.querySelector('#game-view .field-heading .eyebrow').textContent = 'DAS MATCH';
+    document.querySelector('#how-to-link').href = '/playground#how-to';
+    canvas.elt.setAttribute('aria-label', 'Online-Spielfeld: Bewege die Maus, um deinen Schwarm zu lenken');
+    multiplayer = new MultiplayerClient({
+      getEnvironment: () => env,
+      onMatch: config => {
+        clearTimeout(resultTimer);
+        env = MatchSimulation.create(config);
+        simulationFrame = 0;
+        painting = false;
+        paintFrom = null;
+        uiState = '';
+        renderGame();
+      },
+      onChange: syncOnlineUI,
+      onEnd: showMatchResult,
+    });
+    document.querySelector('#play-button').addEventListener('click', () => multiplayer.queue());
+    document.querySelector('#cancel-search-button').addEventListener('click', () => multiplayer.cancel());
+    document.querySelector('#leave-button').addEventListener('click', () => multiplayer.leave());
+    document.querySelector('#return-button').addEventListener('click', () => {
+      clearTimeout(resultTimer);
+      multiplayer.returnToLobby();
+    });
+    syncOnlineUI();
+  } else document.body.dataset.view = 'solo';
   frameRate(60);
-  if (manualStepping) {
+  if (gameParams.has('debug')) {
     installGameHarness();
-    noLoop();
+    if (soloMode) noLoop();
   }
   renderGame();
 }
 
 function draw() {
+  if (multiplayer && multiplayer.phase !== 'match') return;
   noCursor();
-  if (!manualStepping) {
+  if (multiplayer) {
+    multiplayer.advance(performance.now());
+    simulationFrame = env.tick / 2;
+  } else if (!manualStepping) {
     env.updateSubstep();
     simulationFrame = env.tick / 2;
   }
@@ -47,6 +87,7 @@ function draw() {
 }
 
 function advanceSimulation(frames) {
+  if (multiplayer) throw new Error('Online matches advance only through server inputs');
   for (let frame = 0; frame < frames; frame++) env.update();
   simulationFrame = env.tick / 2;
 }
@@ -54,19 +95,21 @@ function advanceSimulation(frames) {
 function syncUI() {
   const counts = env.teamCounts();
   const capture = env.scenario === 'capture';
-  const key = `${counts}:${capture}:${manualStepping}:${env.obstacles.length > 0}`;
+  const key = `${counts}:${capture}:${manualStepping}:${env.obstacles.length > 0}:${multiplayer?.team}:${Boolean(multiplayer?.verified)}`;
   if (key === uiState) return;
   uiState = key;
   document.body.dataset.paused = String(manualStepping);
   document.querySelector('#particle-count').textContent = env.particles.length.toLocaleString('en-US');
   document.querySelector('#empty-state').hidden = env.particles.length > 0;
-  document.querySelector('#simulation-label').textContent = manualStepping ? 'Paused' : 'Live';
+  document.querySelector('#simulation-label').textContent = multiplayer
+    ? multiplayer.verified ? 'Synchronisiert' : 'Synchronisiere…' : manualStepping ? 'Paused' : 'Live';
   document.querySelector('#pause-label').textContent = manualStepping ? 'Resume' : 'Pause';
   document.querySelector('#pause-icon').setAttribute('href', manualStepping ? '#icon-play' : '#icon-pause');
   document.querySelector('#pause-button').setAttribute('aria-pressed', String(manualStepping));
   document.querySelector('#map-label').textContent = env.obstacles.length ? 'Custom terrain' : 'Open field';
   document.querySelector('#spawn-note').textContent = env.particles.length ? 'Replaces your current swarm.' : 'Start with 1,000 little explorers.';
-  document.querySelector('#mode-name').textContent = capture ? 'Capture challenge' : 'Free play';
+  document.querySelector('#mode-name').textContent = multiplayer
+    ? multiplayer.phase === 'match' ? 'Online-Match' : 'Lobby' : capture ? 'Capture challenge' : 'Free play';
   document.querySelector('#team-stats').hidden = !capture;
   document.querySelector('#blue-count').textContent = counts[0].toLocaleString('en-US');
   document.querySelector('#red-count').textContent = counts[1].toLocaleString('en-US');
@@ -75,14 +118,56 @@ function syncUI() {
       : counts[0] === 0 ? 'No blue units left. Start a new challenge to try again.'
         : 'Guide your blue swarm into the resting red cloud. Hold contact to capture it.';
   document.querySelector('#capture-status').hidden = !capture;
+  document.querySelector('#match-blue-count').textContent = counts[0].toLocaleString('de-DE');
+  document.querySelector('#match-red-count').textContent = counts[1].toLocaleString('de-DE');
+  document.querySelector('#your-team').textContent = multiplayer?.team === 1 ? 'Du spielst Rot' : 'Du spielst Blau';
+  document.querySelector('#your-team').dataset.team = String(multiplayer?.team ?? 0);
+}
+
+function syncOnlineUI() {
+  if (!multiplayer) return;
+  const { phase, connection, online, waiting } = multiplayer;
+  document.body.dataset.view = phase;
+  document.querySelector('#lobby-view').hidden = phase !== 'lobby' && phase !== 'searching';
+  document.querySelector('#game-view').hidden = phase !== 'match';
+  document.querySelector('#result-view').hidden = phase !== 'result';
+  document.querySelector('#leave-button').hidden = phase !== 'match';
+  document.querySelector('#online-count').textContent = String(online);
+  document.querySelector('#waiting-count').textContent = String(waiting);
+  document.querySelector('#play-button').hidden = phase === 'searching';
+  document.querySelector('#play-button').disabled = connection !== 'online';
+  document.querySelector('#cancel-search-button').hidden = phase !== 'searching';
+  document.querySelector('#connection-label').textContent = connection === 'online' ? 'Verbunden'
+    : connection === 'offline' ? 'Verbindung unterbrochen' : 'Verbinde…';
+  document.querySelector('#lobby-message').textContent = multiplayer.notice || (phase === 'searching'
+    ? 'Wir suchen einen freien Mitspieler für dich.' : connection === 'offline'
+      ? 'Die Verbindung wird wiederhergestellt. Du wirst nicht automatisch eingereiht.'
+      : 'Ein Klick. Zwei Schwärme. Finde deinen Mitspieler.');
+  document.querySelector('#session-kind').textContent = 'Mehrspieler';
+  document.querySelector('#mode-name').textContent = phase === 'match' ? 'Online-Match' : phase === 'searching' ? 'Spielersuche' : 'Lobby';
+}
+
+function showMatchResult(result) {
+  const victory = result.reason === 'victory';
+  document.querySelector('#result-title').textContent = victory ? result.winner === result.team ? 'Gewonnen!' : 'Gut gespielt!'
+    : result.reason === 'desync' ? 'Synchronisation unterbrochen' : 'Spiel beendet';
+  document.querySelector('#result-message').textContent = victory
+    ? result.winner === result.team ? 'Alle Einheiten gehören jetzt zu deinem Schwarm.' : 'Dein Mitspieler hat alle Einheiten übernommen.'
+    : result.reason === 'desync' ? 'Die Spielzustände stimmen nicht überein. Dieses Spiel wird nicht gewertet.'
+      : result.reason === 'timeout' ? 'Ein Mitspieler antwortet nicht mehr. Ihr kehrt in die Lobby zurück.'
+        : 'Die Verbindung wurde getrennt oder ein Spieler hat das Match verlassen.';
+  syncOnlineUI();
+  clearTimeout(resultTimer);
+  resultTimer = setTimeout(() => multiplayer.returnToLobby(), 2500);
 }
 
 function renderGame() {
-  renderer.render(env, drawingContext, painting);
+  renderer.render(env, drawingContext, painting, multiplayer?.cursor);
   syncUI();
 }
 
 function setPaused(paused) {
+  if (multiplayer) throw new Error('An online match cannot be paused locally');
   manualStepping = paused;
   if (paused) noLoop();
   else loop();
@@ -112,6 +197,7 @@ function installCanvasInput(canvas) {
     };
   };
   const applyTarget = point => {
+    if (multiplayer) { multiplayer.target(point.x, point.y); return; }
     env.player.setTarget(point.x, point.y);
     env.player.update();
   };
@@ -128,6 +214,7 @@ function installCanvasInput(canvas) {
     event.preventDefault();
     const point = pointFor(event);
     applyTarget(point);
+    if (multiplayer) return;
     painting = true;
     activePointer = event.pointerId;
     paintFrom = point;
@@ -164,7 +251,9 @@ function keyPressed() {
   };
   const direction = directions[keyCode];
   if (!direction) return;
-  env.player.dir(...direction);
+  if (multiplayer) multiplayer.target(multiplayer.cursor.x + direction[0] * env.SPEED,
+    multiplayer.cursor.y + direction[1] * env.SPEED);
+  else env.player.dir(...direction);
   if (manualStepping) renderGame();
   return false;
 }

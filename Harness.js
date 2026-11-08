@@ -63,6 +63,7 @@ function installGameHarness() {
   window.gameHarness = Object.freeze({
     getState,
     reset({ seed: nextSeed = 1, particleCount = 1000 } = {}) {
+      if (multiplayer) throw new Error('Cannot reset an online match locally');
       validateSeed(nextSeed);
       if (!Number.isInteger(particleCount) || particleCount < 0 || particleCount > 10000) {
         throw new RangeError('particleCount must be an integer between 0 and 10000');
@@ -84,13 +85,16 @@ function installGameHarness() {
       return getState();
     },
     setTarget(x, y) {
-      env.player.setTarget(x, y);
+      if (multiplayer) multiplayer.target(x, y);
+      else env.player.setTarget(x, y);
     },
     spawn() {
+      if (multiplayer) throw new Error('Cannot spawn units in an online match');
       start();
       return getState();
     },
     captureChallenge() {
+      if (multiplayer) throw new Error('Cannot replace an online match');
       startCaptureChallenge();
       return getState();
     },

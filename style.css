@@ -10,6 +10,7 @@
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { min-width: 320px; scroll-behavior: smooth; }
 body { margin: 0; background: radial-gradient(ellipse at 45% -20%, #15312f65, transparent 60%), var(--page); color: var(--text); }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -104,6 +105,42 @@ kbd { display: grid; place-items: center; width: 18px; height: 18px; border: 1px
 .app-footer a { color: #8b9da8; }
 .app-footer a:hover { color: var(--mint); }
 .app-footer a span { margin-left: 7px; }
+.lobby-view { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; min-height: min(760px, calc(100svh - 170px)); gap: 35px; padding: 65px 5%; }
+.lobby-copy h1 { margin: 22px 0; font-size: clamp(52px, 6vw, 84px); line-height: 1.02; letter-spacing: -4px; }
+.lobby-intro { color: #9bafbd; font-size: 14px; line-height: 1.9; }
+.lobby-counters { display: flex; gap: 50px; margin: 36px 0; }
+.lobby-counters > div { display: flex; flex-direction: column; gap: 5px; }
+.lobby-counters strong { font-size: 40px; font-weight: 400; font-variant-numeric: tabular-nums; }
+.lobby-counters span { color: #89a1af; font-size: 12px; }
+.lobby-actions { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; }
+.lobby-actions .button { width: 155px; min-height: 48px; font-size: 14px; }
+.button:disabled { cursor: wait; opacity: .45; }
+.solo-link { font-size: 12px; color: #9bb4c4; }
+.solo-link:hover { color: var(--mint); }
+.lobby-message { min-height: 36px; max-width: 420px; margin: 22px 0 0; font-size: 12px; line-height: 1.6; color: #93adbc; }
+.lobby-connection { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; color: #6e8d9b; }
+.lobby-art { position: relative; min-height: 380px; }
+.lobby-art > span { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: #577985; font-size: 10px; letter-spacing: 3px; }
+.swarm-orbit { position: absolute; width: 240px; aspect-ratio: 1; border-radius: 50%; background-size: 9px 9px; background-image: radial-gradient(circle, #9ddfff 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #43bfff55); }
+.orbit-blue { left: 3%; top: 40px; transform: rotate(-14deg); }
+.orbit-red { right: 0; top: 135px; width: 190px; background-image: radial-gradient(circle, #ff8ea6 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #ff659c44); transform: rotate(12deg); }
+.result-view { min-height: 62svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 55px 20px; text-align: center; }
+.result-view h1 { margin-top: 20px; font-size: clamp(28px, 5vw, 52px); }
+#result-message { max-width: 500px; color: #a7becb; line-height: 1.8; }
+.result-return { color: #768f9f; font-size: 12px; }
+.result-view .button { width: 180px; margin-top: 20px; }
+.online-controls, .online-hint { display: none; }
+body[data-view="match"] .solo-controls, body[data-view="match"] .solo-hint { display: none; }
+body[data-view="match"] .online-controls, body[data-view="match"] .online-hint { display: block; }
+.your-team { color: #8adfff; font-size: 14px; }
+.your-team[data-team="1"] { color: #ff8ea6; }
+.match-counts { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; }
+.match-counts > div { display: flex; align-items: center; gap: 9px; font-size: 13px; color: #a4bac7; }
+.match-counts i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+.match-counts strong { margin-left: auto; font-weight: 400; font-size: 28px; color: var(--text); font-variant-numeric: tabular-nums; }
+.match-guide { color: #8ba7b8; font-size: 12px; line-height: 1.8; }
+@media (max-width: 900px) { .lobby-view { padding-inline: 0; gap: 5px; } .swarm-orbit { width: 180px; } .orbit-red { width: 145px; top: 170px; } }
+@media (max-width: 650px) { .lobby-view { display: flex; flex-direction: column; align-items: stretch; padding: 45px 0 20px; min-height: 0; } .lobby-copy h1 { font-size: 58px; letter-spacing: -3px; } .lobby-intro br { display: none; } .lobby-counters { gap: 35px; } .lobby-art { min-height: 190px; margin-top: 30px; } .orbit-blue { width: 145px; top: 0; left: 10%; } .orbit-red { width: 115px; top: 35px; right: 12%; } }
 @media (min-width: 1600px) { .app-shell { padding: 0 50px; } .workspace { gap: 50px; } }
 @media (max-width: 1050px) { .app-shell { padding: 0 24px; } .workspace { grid-template-columns: minmax(0,1fr) 248px; gap: 24px; } .control-panel { padding: 21px; } .control-panel h2 { font-size: 26px; } .keyboard-hint { display: none; } }
 @media (max-width: 760px) {

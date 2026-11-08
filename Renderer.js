@@ -108,7 +108,7 @@ class Renderer {
     return canvas;
   }
 
-  render(environment, context, isPainting) {
+  render(environment, context, isPainting, cursor = null) {
     if (this.environment !== environment || environment.backgroundDirty) this.buildBackdrop(environment);
     const width = environment.FIELD_X;
     const height = environment.FIELD_Y;
@@ -131,10 +131,10 @@ class Renderer {
     }
     context.globalAlpha = 1;
 
-    const x = environment.player.x;
-    const y = environment.player.y;
+    const x = cursor?.x ?? environment.player.x;
+    const y = cursor?.y ?? environment.player.y;
     const radius = isPainting ? environment.player.playerScale : 10;
-    context.strokeStyle = isPainting ? '#e1ba89ba' : '#b7ffe3ba';
+    context.strokeStyle = isPainting ? '#e1ba89ba' : cursor?.team === 1 ? '#ff9db7' : '#b7ffe3ba';
     context.fillStyle = isPainting ? '#dab3770b' : '#a2fbe407';
     context.lineWidth = 0.8;
     context.beginPath();

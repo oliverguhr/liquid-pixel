@@ -36,7 +36,7 @@ async function openGame(page) {
 test('normal game starts and responds to mouse and spawn button', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/');
+  await page.goto('/playground');
   await expect(page.locator('#game-canvas')).toBeVisible();
   await page.getByRole('button', { name: 'Spawn swarm', exact: true }).click();
   await moveTarget(page, 650, 440);

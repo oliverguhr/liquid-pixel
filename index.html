@@ -13,8 +13,11 @@
     <script defer src="Player.js"></script>
     <script defer src="Particle.js"></script>
     <script defer src="Obstacle.js"></script>
+    <script defer src="Determinism.js"></script>
     <script defer src="Environment.js"></script>
+    <script defer src="MatchSimulation.js"></script>
     <script defer src="Renderer.js"></script>
+    <script defer src="Multiplayer.js"></script>
     <script defer src="Game.js"></script>
     <script defer src="Harness.js"></script>
   </head>
@@ -34,14 +37,42 @@
           <svg class="brand-mark" viewBox="0 0 36 40" aria-hidden="true"><path d="M18 2C13 11 4 17 4 25a14 14 0 0 0 28 0C32 17 23 11 18 2Z" fill="currentColor"/><circle cx="23" cy="27" r="5" fill="#0b131b" fill-opacity=".24"/></svg>
           <span>liquid<span class="brand-light">pixel</span><span class="brand-dot">.</span></span>
         </a>
-        <div class="mode-label"><span class="tiny-dot"></span>Single player <span class="mode-divider">/</span> <span id="mode-name">Free play</span></div>
+        <div class="mode-label"><span class="tiny-dot"></span><span id="session-kind">Single player</span> <span class="mode-divider">/</span> <span id="mode-name">Lobby</span></div>
+        <button id="leave-button" class="button button-quiet" type="button" hidden>Spiel verlassen</button>
         <button id="pause-button" class="button button-quiet" type="button" aria-pressed="false">
           <svg class="icon" aria-hidden="true"><use id="pause-icon" href="#icon-pause"/></svg>
           <span id="pause-label">Pause</span>
         </button>
       </header>
 
-      <main class="workspace">
+      <section id="lobby-view" class="lobby-view" aria-labelledby="lobby-title">
+        <div class="lobby-copy">
+          <p class="eyebrow">LIQUID PIXEL · ONLINE</p>
+          <h1 id="lobby-title">Gemeinsam<br>im Fluss.</h1>
+          <p class="lobby-intro">Tausend kleine Individuen. Ein gemeinsames Spielfeld.<br>Lenke deinen Schwarm und übernimm den deines Mitspielers.</p>
+          <div class="lobby-counters" aria-label="Spieler in der Lobby">
+            <div><strong id="online-count">0</strong><span>Spieler online</span></div>
+            <div><strong id="waiting-count">0</strong><span>warten auf Mitspieler</span></div>
+          </div>
+          <div class="lobby-actions">
+            <button id="play-button" class="button button-primary" type="button" disabled>Spielen <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+            <button id="cancel-search-button" class="button button-quiet" type="button" hidden>Suche abbrechen</button>
+            <a class="solo-link" href="/playground">Einzelspieler ausprobieren <span aria-hidden="true">↗</span></a>
+          </div>
+          <p id="lobby-message" class="lobby-message" role="status">Verbindung zum Spielserver wird hergestellt.</p>
+          <span class="lobby-connection"><span class="tiny-dot"></span><span id="connection-label">Verbinde…</span></span>
+        </div>
+        <div class="lobby-art" aria-hidden="true"><div class="swarm-orbit orbit-blue"></div><div class="swarm-orbit orbit-red"></div><span>Jeder Punkt zählt.</span></div>
+      </section>
+
+      <section id="result-view" class="result-view" aria-labelledby="result-title" hidden>
+        <p class="eyebrow">LIQUID PIXEL</p><h1 id="result-title">Spiel beendet</h1>
+        <p id="result-message" role="status"></p>
+        <p class="result-return">Du kehrst gleich in die Lobby zurück.</p>
+        <button id="return-button" class="button button-primary" type="button">Zur Lobby</button>
+      </section>
+
+      <main class="workspace" id="game-view" hidden>
         <section class="field-section" aria-labelledby="playground-title">
           <div class="field-wrap">
             <div class="field-heading">
@@ -58,13 +89,24 @@
               <div class="canvas-caption" aria-hidden="true"><span><span class="map-dot"></span><span id="map-label">Open field</span></span><span>LIQUID / 01</span></div>
             </div>
             <div class="field-footer">
-              <span><svg class="icon" aria-hidden="true"><use href="#icon-pointer"/></svg>Move to guide <span class="footer-dot">·</span> Drag to draw</span>
+              <span class="solo-hint"><svg class="icon" aria-hidden="true"><use href="#icon-pointer"/></svg>Move to guide <span class="footer-dot">·</span> Drag to draw</span>
+              <span class="online-hint">Bewege die Maus, um deinen Schwarm zu lenken.</span>
               <span class="keyboard-hint"><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><span>to steer</span></span>
             </div>
           </div>
         </section>
 
         <aside class="control-panel" aria-label="Swarm controls">
+          <div class="online-controls">
+            <p class="eyebrow">DEIN MATCH</p>
+            <h2>Zwei Schwärme.<br>Ein Spielfeld.</h2>
+            <p id="your-team" class="your-team" data-team="0">Du spielst Blau</p>
+            <div class="match-counts"><div><i class="legend-swarm"></i><span>Blau</span><strong id="match-blue-count">0</strong></div><div><i class="legend-enemy"></i><span>Rot</span><strong id="match-red-count">0</strong></div></div>
+            <div class="panel-divider"></div>
+            <p class="match-guide">Lenke deinen Schwarm in die gegnerische Wolke. Bei anhaltendem Kontakt übernehmen deine Einheiten ihre Nachbarn.</p>
+            <p class="match-guide">Du gewinnst, sobald alle Einheiten zu deinem Team gehören.</p>
+          </div>
+          <div class="solo-controls">
           <div class="panel-heading"><span class="eyebrow">YOUR LITTLE UNIVERSE</span><span class="panel-orbit" aria-hidden="true">✳</span></div>
           <h2>Make a path.<br> Watch it flow.</h2>
           <p class="panel-intro">A thousand individuals.<br> A direction only you decide.</p>
@@ -85,9 +127,10 @@
             <div class="tip"><span class="tip-icon"><svg class="icon" aria-hidden="true"><use href="#icon-draw"/></svg></span><div><strong>Shape the terrain</strong><p>Click and drag to draw obstacles. See how the flow adapts.</p></div></div>
           </div>
           <button id="clear-button" class="button button-clear" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-clear"/></svg><span>Clear terrain</span></button>
+          </div>
         </aside>
       </main>
-      <footer class="app-footer"><span>An experiment in collective motion.</span><a href="#how-to">How to play <span aria-hidden="true">↗</span></a></footer>
+      <footer class="app-footer"><span>An experiment in collective motion.</span><a id="how-to-link" href="#how-to">How to play <span aria-hidden="true">↗</span></a></footer>
     </div>
   </body>
 </html>

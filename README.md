@@ -12,11 +12,29 @@ npm ci
 npm start
 ```
 
-Open http://127.0.0.1:4173. Click `Spawn swarm`, move the mouse to steer, and drag
-on the canvas to paint obstacles. Arrow keys also move the target. p5.js is
-installed locally, so the game needs no CDN after installation.
-Restart an already running local server after this update so it serves the
-new `Renderer.js` file.
+Open http://127.0.0.1:4173. The lobby shows connected players and players waiting
+for an opponent. Click `Spielen` in two tabs or browsers to start a random
+two-player match. Search can be cancelled. Move the mouse or use the arrow
+keys to guide your assigned blue or red swarm. Both teams start with 1,000
+units. Capture the entire other team to win; both players return to the lobby
+after the result. Leaving or losing the connection also ends the match.
+
+Restart an already running server after this update: it now serves WebSocket
+connections as well as the game files. To make it reachable on your local
+network, run `HOST=0.0.0.0 npm start` and open the host's LAN address on port
+4173. `PORT` changes the port. HTTPS hosting should forward `/socket` WebSocket
+upgrades to the same Node server; the browser automatically uses `wss:` there.
+
+The server manages matchmaking, numbered input batches and state-report
+comparison. Both clients simulate the complete match; the server does not
+calculate particle movement or stream particle positions. See the
+[multiplayer design and protocol](docs/multiplayer-design.md).
+
+The existing singleplayer playground remains at
+http://127.0.0.1:4173/playground. Click `Spawn swarm`, move the mouse to steer,
+and drag to paint obstacles. Terrain editing and local Pause/Resume belong to
+the playground. Online matches start on the same open field for both players.
+p5.js is installed locally, so the game needs no CDN after installation.
 
 The responsive interface has a live unit count, Pause/Resume and Clear terrain
 controls. The canvas renders at a minimum of 1600×1600 backing pixels, rising
@@ -55,21 +73,24 @@ numbers. Randomness only determines the seeded spawn order.
 ## Tests and visual verification
 
 ```bash
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 npm test -- --runInBand
 npm run test:browser
 npm run test:all
 npm run play:agent
 npm run play:preview
 npm run play:capture
+npm run play:multiplayer
 ```
 
 On Linux, install missing browser system libraries if needed with
-`npx playwright install-deps chromium`.
+`npx playwright install-deps chromium firefox webkit`.
 
 The tests use the same simulation as the game. Node tests can construct an
 `Environment` with `graphics: false`; they need no mocked p5 implementation.
-Browser tests run real Chromium and use real mouse and button events.
+Browser tests use real mouse and button events. Multiplayer checks also run
+Firefox and WebKit, comparing full simulation states against Chromium and
+Node and playing actual mixed-engine matches.
 They start their own server on port **4174**, allowing the game on 4173 to
 remain open. Set `LIQUID_PIXEL_TEST_PORT` to use a different test port.
 
@@ -103,6 +124,12 @@ in `artifacts/swarm-preview/swarm-motion.webm`. This is useful for judging
 movement and individual behaviour, which screenshots alone cannot establish.
 The scripts use their own temporary server ports. Use
 `npm run test:browser -- --headed` to watch the browser tests.
+
+`play:multiplayer` opens two independent browser sessions at the normal lobby,
+clicks through matchmaking, plays a live match to completion and checks that
+both complete states match. Videos, interface screenshots and the final
+states are saved in `artifacts/multiplayer-preview/`. It uses a fixed server
+seed for reproducibility and does not advance the match through debug steps.
 
 ## Controlling the simulation
 
@@ -138,6 +165,12 @@ particles on obstacles, particles outside the field, incorrect ownership,
 positions off the grid and orphaned cell owners. Healthy runs keep all zero.
 `reset` clears graphics, particles, obstacles, clocks and input state.
 
+`?online&debug` instead opens the real lobby with diagnostics enabled. Online
+matches advance only from server input; local reset, spawn, pause and step
+commands are rejected. The client's `multiplayer.checkpoints` map retains
+the last 20 reports and canonical states in debug mode. Normal online play
+keeps no such snapshot history and exposes no `gameHarness`.
+
 ## Development
 
 - [TODO.md](TODO.md): priorities, bug status and acceptance criteria.
@@ -149,3 +182,5 @@ positions off the grid and orphaned cell owners. Healthy runs keep all zero.
   responsive input and interface checks.
 - [Capture verification](docs/capture-validation.md): local opponent capture,
   health, healing, tests and a live browser recording.
+- [Multiplayer design](docs/multiplayer-design.md): implemented lobby, client-side
+  simulation, input protocol, checks and initial validation boundaries.

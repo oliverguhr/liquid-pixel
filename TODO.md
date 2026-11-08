@@ -129,16 +129,41 @@ akzeptiert. Phase 2 ist damit abgeschlossen.
 
 ## Phase 3: Zwei Spieler über WebSocket synchronisieren
 
-- [ ] Synchronisationsmodell anhand der stabilen lokalen Simulation festlegen.
-- [ ] Verbindung und Zuordnung zweier Spieler zu ihren Wolken umsetzen.
-- [ ] Eingaben, Bewegung und Übernahmen synchronisieren.
-- [ ] In zwei Browser-Kontexten beide Wolken bewegen und Übernahmen in beide
+- Ziel: Beide Clients berechnen die gesamte Simulation; der Server vermittelt
+  Eingaben und verwaltet Lobby und Matches. Synchronität hat Vorrang;
+  umfassender Cheat-Schutz folgt später. Details:
+  [docs/multiplayer-design.md](docs/multiplayer-design.md).
+
+- [x] Deterministisches Lockstep mit festen Schritten, identischem Zufall und
+  browserübergreifend gleichen Berechnungen umsetzen und zunächst isoliert prüfen.
+- [x] Kanonische Zustandsprüfsummen und einen kontrollierten Abbruch bei
+  Abweichungen ergänzen; keine ungeprüften Client-Snapshots übernehmen.
+- [x] Lobby mit Online- und Wartendenzahl sowie abbrechbarer Zufallssuche ergänzen.
+- [x] Verbindung und Zuordnung zweier Spieler zu ihren Wolken umsetzen.
+- [x] Eingaben serverseitig prüfen, nummerierten Schritten zuordnen und identisch
+  an beide Clients verteilen. Bewegung und Übernahmen auf beiden Clients berechnen.
+- [x] In zwei Browser-Kontexten beide Wolken bewegen und Übernahmen in beide
   Richtungen bei konsistentem Spielstand prüfen.
-- [ ] Verhalten bei Verzögerung, Verbindungsabbruch und erneutem Verbinden
+- [x] Chromium, Firefox und WebKit sowie verzögerte Eingaben und unterschiedliche
+  Renderfrequenzen auf identische Zustände je Simulationsschritt prüfen.
+- [x] Spielende beidseitig bestätigen, kurz das Ergebnis zeigen und beide in
+  die Lobby zurückführen. Kein erneutes automatisches Einreihen.
+- [x] Verhalten bei Verzögerung, Verbindungsabbruch und erneutem Verbinden
   festlegen und prüfen.
+
+Technisch geprüft am 8. November 2026: 52 Modell-/Servertests und 44
+Browserprüfungen bestanden. Zwei normale Sitzungen haben ein vollständiges
+Match bis zum gemeinsam bestätigten Sieg und zurück zur Lobby gespielt.
+Aufnahmen: `artifacts/multiplayer-preview/`; Ablauf und Grenzen:
+[docs/multiplayer-design.md](docs/multiplayer-design.md).
+
+Der Nutzer hat am 8. November 2026 bestätigt, dass der neue Server bei ihm
+startet. Ein zuvor von uns gestarteter Spielserver wurde dafür beendet.
 
 ## Spätere Aufgaben
 
 - [ ] Performance erst bei konkretem Bedarf messen und Ziele vereinbaren.
 - [ ] Vorgefertigte Karten speichern und laden.
-- [ ] Punktestand und Spielende ergänzen.
+- [ ] Dauerhafte Spielstatistik und Punktestand ergänzen; das reguläre Ende
+  durch vollständige Übernahme ist im Mehrspielermodus bereits vorhanden.
+- [ ] Bei Bedarf stärkeren Cheat-Schutz durch unabhängige Replay-Prüfung planen.
