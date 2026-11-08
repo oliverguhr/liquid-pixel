@@ -23,6 +23,7 @@ function setup() {
   renderer = new Renderer(pixelDensity());
   installCanvasInput(canvas.elt);
   document.querySelector('#spawn-button').addEventListener('click', start);
+  document.querySelector('#challenge-button').addEventListener('click', startCaptureChallenge);
   document.querySelector('#pause-button').addEventListener('click', () => setPaused(!manualStepping));
   document.querySelector('#clear-button').addEventListener('click', () => {
     env.clearObstacles();
@@ -51,7 +52,9 @@ function advanceSimulation(frames) {
 }
 
 function syncUI() {
-  const key = `${env.particles.length}:${manualStepping}:${env.obstacles.length > 0}`;
+  const counts = env.teamCounts();
+  const capture = env.scenario === 'capture';
+  const key = `${counts}:${capture}:${manualStepping}:${env.obstacles.length > 0}`;
   if (key === uiState) return;
   uiState = key;
   document.body.dataset.paused = String(manualStepping);
@@ -63,6 +66,15 @@ function syncUI() {
   document.querySelector('#pause-button').setAttribute('aria-pressed', String(manualStepping));
   document.querySelector('#map-label').textContent = env.obstacles.length ? 'Custom terrain' : 'Open field';
   document.querySelector('#spawn-note').textContent = env.particles.length ? 'Replaces your current swarm.' : 'Start with 1,000 little explorers.';
+  document.querySelector('#mode-name').textContent = capture ? 'Capture challenge' : 'Free play';
+  document.querySelector('#team-stats').hidden = !capture;
+  document.querySelector('#blue-count').textContent = counts[0].toLocaleString('en-US');
+  document.querySelector('#red-count').textContent = counts[1].toLocaleString('en-US');
+  document.querySelector('#capture-status').textContent = !capture ? ''
+    : counts[1] === 0 && counts[0] > 0 ? 'All yours. The red cloud joined your swarm.'
+      : counts[0] === 0 ? 'No blue units left. Start a new challenge to try again.'
+        : 'Guide your blue swarm into the resting red cloud. Hold contact to capture it.';
+  document.querySelector('#capture-status').hidden = !capture;
 }
 
 function renderGame() {
@@ -80,6 +92,13 @@ function setPaused(paused) {
 function start() {
   env.running = true;
   env.createParticles();
+  renderGame();
+}
+
+function startCaptureChallenge() {
+  env.createCaptureScenario();
+  // Apply targets immediately even when the debug harness has paused playback.
+  for (const team of env.teams) team.player.update();
   renderGame();
 }
 

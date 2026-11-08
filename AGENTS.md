@@ -44,6 +44,15 @@ stabilen Singleplayer ausgearbeitet.
 - Browser-Spiel mit p5.js; Einstieg über `index.html` und `Game.js`.
 - `Environment.js`: Spielfeld, Aktualisierung, Distanzfeld und Hindernisse.
 - `Particle.js`, `Player.js`, `Cell.js`, `Obstacle.js`: Spielobjekte.
+- Jeder Partikel hat `team` und `health`. `Environment.teams` hält getrennte
+  Ziele und Distanzfelder. `env.player` ist weiterhin das Mausziel von Team 0;
+  die öffentlichen Zellwerte `distance` und `potential` gehören zu Team 0.
+- Kampfregeln und Nachweise stehen in `docs/capture-validation.md`.
+  Besitzwechsel erhalten Partikel-ID und Rasterzelle. Die Kontaktaktion darf
+  nicht mit jedem zusätzlichen Bewegungsteilversuch erneut ausgeführt werden.
+  Die rote Wolke des Capture-Szenarios bleibt ortsfest, verwendet aber dieselben
+  Kampfregeln wie Blau. Änderungen an Teamzugehörigkeit müssen sich in
+  Darstellung, Teamzahlen und Harness-Zustand widerspiegeln.
 - `Harness.js`: optionale Browsersteuerung über `window.gameHarness` bei
   einer URL mit `?debug&seed=123`.
 - `scripts/serve.cjs`: lokaler Server; `scripts/play.cjs`: reproduzierbarer
@@ -110,6 +119,7 @@ npm run test:browser       # Browser-Tests
 npm run test:all           # Beide Testsuiten
 npm run play:agent         # Reproduzierbares Wandszenario
 npm run play:preview       # Tatsächliche Animation als Video
+npm run play:capture       # Laufende Gegnerübernahme mit Zustandsnachweisen
 ```
 
 Der Browserlauf schreibt nach `artifacts/agent-play/`; Playwright schreibt

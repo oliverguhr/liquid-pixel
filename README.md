@@ -22,10 +22,17 @@ The responsive interface has a live unit count, Pause/Resume and Clear terrain
 controls. The canvas renders at a minimum of 1600×1600 backing pixels, rising
 to 2400×2400 on displays with a pixel density of 3. The logical world remains
 800×800, so changing display size or density does not change the simulation.
-`Renderer.js` provides shaded round cyan motes, cached glow, a quiet background
+`Renderer.js` provides shaded round blue motes, cached glow, a quiet background
 grid, outlined terrain and the cursor. It uses no random numbers or movement
 updates. Pointer coordinates are mapped from the displayed canvas into the
 world using precise Pointer Events, including fractional screen coordinates.
+
+`Capture challenge` starts 1,000 blue units and a stationary red cloud of 400.
+Move the mouse into the red cloud and hold contact to capture its units. Both
+teams use directional attacks and neighbour healing; weakened units dim.
+Captured units change colour and follow their new team's target. Team counts
+and a completion message show progress. `Spawn swarm` returns to free play;
+both buttons preserve terrain. See the [capture rules and checks](docs/capture-validation.md).
 
 Each particle occupies one 4×4 square; its crisp round visual core fits inside
 that square, with a translucent decorative halo. Obstacles use the same
@@ -54,6 +61,7 @@ npm run test:browser
 npm run test:all
 npm run play:agent
 npm run play:preview
+npm run play:capture
 ```
 
 On Linux, install missing browser system libraries if needed with
@@ -117,6 +125,12 @@ the original 30 Hz time unit. A pause during live playback can therefore
 report a half-integer frame. Fixed seeds and input timing reproduce the
 same states. Screenshot bytes can vary with browser rendering.
 
+`gameHarness.captureChallenge()` starts the same capture scenario as the UI
+button. State includes each particle's `team` and `health`, per-team targets
+and counts, combat parameters and attack/heal/conversion counters. The live
+`play:capture` recording and checkpoint states are saved under
+`artifacts/capture-preview/`.
+
 `getState()` returns copies of particle IDs and positions, obstacle positions,
 input and applied targets, per-region navigation goals, cell size, spawn
 counts and occupancy diagnostics. Diagnostics cover duplicate positions,
@@ -133,3 +147,5 @@ positions off the grid and orphaned cell owners. Healthy runs keep all zero.
 - [Movement verification](docs/movement-validation.md): scenarios and evidence.
 - [Presentation verification](docs/presentation-validation.md): resolution,
   responsive input and interface checks.
+- [Capture verification](docs/capture-validation.md): local opponent capture,
+  health, healing, tests and a live browser recording.

@@ -69,17 +69,20 @@ class Renderer {
     environment.backgroundDirty = false;
   }
 
-  particleSprite(size, shade) {
-    const key = `${size}:${shade}`;
+  particleSprite(size, shade, team) {
+    const key = `${size}:${shade}:${team}`;
     if (this.sprites.has(key)) return this.sprites.get(key);
     const { canvas, context } = this.surface(size, size);
     const center = size / 2;
     const radius = size * 0.37;
     const brightness = (shade - 210) / 45;
     const gradient = context.createRadialGradient(center - radius * 0.25, center - radius * 0.3, 0, center, center, radius);
-    gradient.addColorStop(0, `rgba(215,255,246,${0.8 + brightness * 0.2})`);
-    gradient.addColorStop(0.42, `rgba(${116 + Math.round(brightness * 45)},239,221,0.95)`);
-    gradient.addColorStop(1, `rgba(64,199,190,${0.7 + brightness * 0.2})`);
+    const colors = team === 1
+      ? ['255,222,228', `255,${112 + Math.round(brightness * 40)},142`, '221,65,103']
+      : ['210,243,255', `${108 + Math.round(brightness * 45)},215,255`, '60,164,230'];
+    gradient.addColorStop(0, `rgba(${colors[0]},${0.8 + brightness * 0.2})`);
+    gradient.addColorStop(0.42, `rgba(${colors[1]},0.95)`);
+    gradient.addColorStop(1, `rgba(${colors[2]},${0.7 + brightness * 0.2})`);
     context.fillStyle = gradient;
     context.beginPath();
     context.arc(center, center, radius, 0, Math.PI * 2);
@@ -88,18 +91,20 @@ class Renderer {
     return canvas;
   }
 
-  glowSprite(size) {
-    if (this.glows.has(size)) return this.glows.get(size);
+  glowSprite(size, team) {
+    const key = `${size}:${team}`;
+    if (this.glows.has(key)) return this.glows.get(key);
     const extent = size * 6;
     const { canvas, context } = this.surface(extent, extent);
     const radius = extent / 2;
     const gradient = context.createRadialGradient(radius, radius, 0, radius, radius, radius);
-    gradient.addColorStop(0, 'rgba(80,225,202,0.09)');
-    gradient.addColorStop(0.35, 'rgba(80,225,202,0.025)');
-    gradient.addColorStop(1, 'rgba(80,225,202,0)');
+    const color = team === 1 ? '255,100,126' : '80,190,255';
+    gradient.addColorStop(0, `rgba(${color},0.09)`);
+    gradient.addColorStop(0.35, `rgba(${color},0.025)`);
+    gradient.addColorStop(1, `rgba(${color},0)`);
     context.fillStyle = gradient;
     context.fillRect(0, 0, extent, extent);
-    this.glows.set(size, canvas);
+    this.glows.set(key, canvas);
     return canvas;
   }
 
@@ -115,15 +120,16 @@ class Renderer {
     context.imageSmoothingEnabled = true;
 
     // Cached small sprites avoid filtering the full HiDPI surface every frame.
-    const glow = this.glowSprite(size);
     context.globalCompositeOperation = 'lighter';
     for (const particle of environment.particles) {
-      context.drawImage(glow, particle.x - size * 2.5, particle.y - size * 2.5, size * 6, size * 6);
+      context.drawImage(this.glowSprite(size, particle.team), particle.x - size * 2.5, particle.y - size * 2.5, size * 6, size * 6);
     }
     context.globalCompositeOperation = 'source-over';
     for (const particle of environment.particles) {
-      context.drawImage(this.particleSprite(size, particle.shade), particle.x, particle.y, size, size);
+      context.globalAlpha = 0.5 + 0.5 * particle.health / environment.combat.maxHealth;
+      context.drawImage(this.particleSprite(size, particle.shade, particle.team), particle.x, particle.y, size, size);
     }
+    context.globalAlpha = 1;
 
     const x = environment.player.x;
     const y = environment.player.y;

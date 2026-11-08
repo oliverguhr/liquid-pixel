@@ -11,8 +11,9 @@ function installGameHarness() {
   function getState() {
     const occupied = new Set();
     const obstacles = new Map(env.obstacles.map(({ x, y }) => [`${x},${y}`, { x, y }]));
-    const diagnostics = { overlaps: 0, onObstacles: 0, outsideField: 0, gridMismatches: 0, offGrid: 0, orphanedCells: 0 };
-    const particles = env.particles.map(({ id, x, y, xspeed, yspeed }, index) => {
+    const diagnostics = { overlaps: 0, onObstacles: 0, outsideField: 0, gridMismatches: 0, offGrid: 0, orphanedCells: 0,
+      invalidTeams: 0, invalidHealth: 0 };
+    const particles = env.particles.map(({ id, x, y, xspeed, yspeed, team, health }, index) => {
       const position = `${x},${y}`;
       if (occupied.has(position)) diagnostics.overlaps++;
       occupied.add(position);
@@ -21,18 +22,29 @@ function installGameHarness() {
       if (x % env.SCALE || y % env.SCALE) diagnostics.offGrid++;
       if (cell?.obstacle) diagnostics.onObstacles++;
       if (cell?.particle !== env.particles[index]) diagnostics.gridMismatches++;
-      return { id, x, y, xspeed, yspeed };
+      if (!env.teams[team]) diagnostics.invalidTeams++;
+      if (!Number.isInteger(health) || health < 0 || health > env.combat.maxHealth) diagnostics.invalidHealth++;
+      return { id, x, y, xspeed, yspeed, team, health };
     });
     const active = new Set(env.particles);
     for (const cell of env.cells) {
       if (cell.particle && (!active.has(cell.particle)
           || cell.particle.x !== cell.x || cell.particle.y !== cell.y)) diagnostics.orphanedCells++;
     }
+    const counts = env.teamCounts();
     return {
       seed,
       frame: simulationFrame,
       paused: manualStepping,
       running: env.running,
+      scenario: env.scenario,
+      combat: { ...env.combat },
+      combatStats: { ...env.combatStats },
+      teams: env.teams.map(team => ({ id: team.id, stationary: team.stationary, count: counts[team.id],
+        target: { x: team.player.x, y: team.player.y },
+        inputTarget: { x: team.player.dx, y: team.player.dy },
+        navigationGoals: team.navigationGoals.map(goal => ({ ...goal })),
+      })),
       width: env.FIELD_X,
       height: env.FIELD_Y,
       cellSize: env.SCALE,
@@ -76,6 +88,10 @@ function installGameHarness() {
     },
     spawn() {
       start();
+      return getState();
+    },
+    captureChallenge() {
+      startCaptureChallenge();
       return getState();
     },
     step(frames = 1) {

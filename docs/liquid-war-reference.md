@@ -78,6 +78,14 @@ Gesundheitsabbau, Teamwechsel und Heilung ableiten. Welche Parameter das
 gewünschte Spielgefühl ergeben, bleibt mit dem Szenario »bewegte Wolke
 übernimmt statische Wolke« zu beurteilen.
 
+Seit dem 8. November ist dieses lokale Szenario über `Capture challenge`
+implementiert. Unsere Startparameter, Ergänzungen zum Takt, Abweichungen
+und die Verhaltensprüfungen stehen in
+[capture-validation.md](capture-validation.md). Der Seitenangriff orientiert
+sich an `SIDE_ATTACK_FACTOR = 4`, also einer Rechtsverschiebung um vier Bits.
+Die konkrete Zahlenkonfiguration und der ruhende Gegner sind unsere eigenen
+Festlegungen. Der Originalcode wurde als Referenz gelesen, nicht übernommen.
+
 ## Bezug zum Plan
 
 - Phase 1: Begehbare Distanzen, Ausweichrichtungen und Randverhalten verbessern.

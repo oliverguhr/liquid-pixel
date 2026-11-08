@@ -34,7 +34,7 @@
           <svg class="brand-mark" viewBox="0 0 36 40" aria-hidden="true"><path d="M18 2C13 11 4 17 4 25a14 14 0 0 0 28 0C32 17 23 11 18 2Z" fill="currentColor"/><circle cx="23" cy="27" r="5" fill="#0b131b" fill-opacity=".24"/></svg>
           <span>liquid<span class="brand-light">pixel</span><span class="brand-dot">.</span></span>
         </a>
-        <div class="mode-label"><span class="tiny-dot"></span>Single player <span class="mode-divider">/</span> Free play</div>
+        <div class="mode-label"><span class="tiny-dot"></span>Single player <span class="mode-divider">/</span> <span id="mode-name">Free play</span></div>
         <button id="pause-button" class="button button-quiet" type="button" aria-pressed="false">
           <svg class="icon" aria-hidden="true"><use id="pause-icon" href="#icon-pause"/></svg>
           <span id="pause-label">Pause</span>
@@ -71,8 +71,14 @@
           <div class="swarm-stat"><span class="stat-label">ACTIVE UNITS</span><strong id="particle-count" aria-live="polite">0</strong><span class="stat-caption">small pieces of a bigger picture</span></div>
           <button id="spawn-button" class="button button-primary" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-spark"/></svg><span>Spawn swarm</span><svg class="icon spawn-arrow" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
           <p id="spawn-note" class="button-note">Start with 1,000 little explorers.</p>
+          <button id="challenge-button" class="button button-challenge" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg><span>Capture challenge</span></button>
+          <div id="team-stats" class="team-stats" hidden aria-label="Team unit counts">
+            <span><i class="legend-swarm"></i>Blue <strong id="blue-count">0</strong></span>
+            <span><i class="legend-enemy"></i>Red <strong id="red-count">0</strong></span>
+          </div>
+          <p id="capture-status" class="capture-status" role="status" hidden></p>
           <div class="panel-divider"></div>
-          <div class="legend"><span><i class="legend-swarm"></i>Your swarm</span><span><i class="legend-terrain"></i>Terrain</span></div>
+          <div class="legend"><span><i class="legend-swarm"></i>Your swarm</span><span><i class="legend-enemy"></i>Opponent</span><span><i class="legend-terrain"></i>Terrain</span></div>
           <div class="how-to" id="how-to">
             <h3>A little guidance</h3>
             <div class="tip"><span class="tip-icon"><svg class="icon" aria-hidden="true"><use href="#icon-pointer"/></svg></span><div><strong>Lead the way</strong><p>Move your cursor. The swarm will find its own way to you.</p></div></div>

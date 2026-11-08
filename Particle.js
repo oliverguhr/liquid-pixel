@@ -1,9 +1,13 @@
 class Particle {
-  constructor(x, y, environment) {
+  constructor(x, y, environment, team = 0) {
+    if (!environment.teams[team]) throw new RangeError('Unknown particle team');
     const cell = environment.getCell(x, y);
     if (!cell || cell.isBlocked()) throw new RangeError('Particle needs a free cell');
     this.environment = environment;
     this.id = environment.nextParticleId++;
+    this.team = team;
+    this.health = environment.combat.maxHealth;
+    this.convertedAt = -1;
     const identity = Math.imul(this.id + 1, 0x9e3779b1) >>> 0;
     this.phase = identity & 63;
     this.shade = 210 + ((identity >>> 8) % 46);

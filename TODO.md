@@ -83,7 +83,7 @@ Der Nutzer hat die Bewegung am 8. November vorerst akzeptiert. Eine Aufnahme
 liegt nach `npm run play:preview` unter
 `artifacts/swarm-preview/swarm-motion.webm`.
 
-### Aktuell beauftragt: moderne Darstellung
+### Moderne Darstellung
 
 - [x] Darstellungsauflösung erhöhen und HiDPI-Bildschirme berücksichtigen:
   mindestens 1600×1600, bei Pixeldichte 3 bis 2400×2400.
@@ -109,15 +109,23 @@ Nachweise und Vorschauen: [docs/presentation-validation.md](docs/presentation-va
 
 ## Phase 2: Gegnerische Partikel übernehmen
 
-- [ ] Übernahme- und Heilungsregeln des Originals anhand der
+- [x] Übernahme- und Heilungsregeln des Originals anhand der
   [Referenznotizen](docs/liquid-war-reference.md) für unser Spiel konkretisieren.
-- [ ] Zweiten lokalen Schwarm mit eigener Zugehörigkeit ergänzen.
-- [ ] Regeln für Kontakt, Gesundheit und Besitzwechsel umsetzen.
-- [ ] Einfaches Abnahmeszenario: Eine Wolke bleibt statisch; eine zweite,
+- [x] Zweiten lokalen Schwarm mit eigener Zugehörigkeit ergänzen.
+- [x] Regeln für Kontakt, Gesundheit und Besitzwechsel umsetzen.
+- [x] Einfaches Abnahmeszenario: Eine Wolke bleibt statisch; eine zweite,
   bewegte Wolke wird hineingesteuert und übernimmt ihre Pixel.
-- [ ] Besitzwechsel, Partikelzahl und Rasterbelegung prüfen.
-- [ ] Gemeinsam beurteilen, ob das »Fressen« sichtbar nachvollziehbar und
+- [x] Besitzwechsel, Partikelzahl und Rasterbelegung prüfen.
+- [x] Gemeinsam beurteilen, ob das »Fressen« sichtbar nachvollziehbar und
   sinnvoll aussieht.
+
+Spielbar über `Capture challenge`: 1.000 blaue gegen 400 ruhende rote
+Einheiten. Beide Teams verwenden dieselben Kampfregeln. Die konkreten Regeln,
+automatischen Prüfungen und die laufende Aufnahme stehen in
+[docs/capture-validation.md](docs/capture-validation.md).
+
+Der Nutzer hat das Übernahmeszenario am 8. November 2026 mit »sieht gut aus«
+akzeptiert. Phase 2 ist damit abgeschlossen.
 
 ## Phase 3: Zwei Spieler über WebSocket synchronisieren
 
