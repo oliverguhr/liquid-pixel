@@ -1,18 +1,19 @@
 class Cell {
-    constructor() {
-        this.distance = 0;
-        this.particle = undefined;
-        this.player = false;
-        this.obstacle = false;
-        this.x = 0;
-        this.y = 0;
-    
-        this.isBlocked = function() {
-            return this.particle != undefined || this.player || this.obstacle;
-        }
-    }
+  constructor(x = 0, y = 0, index = 0) {
+    this.x = x;
+    this.y = y;
+    this.index = index;
+    this.distance = Infinity;
+    this.potential = Infinity;
+    this.component = -1;
+    this.particle = undefined;
+    this.obstacle = false;
+    this.neighbours = [];
+  }
+
+  isBlocked() {
+    return this.obstacle || this.particle !== undefined;
+  }
 }
 
-if (typeof module !== "undefined") {
-    module.exports = Cell;
-}
+if (typeof module !== 'undefined') module.exports = Cell;

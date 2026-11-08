@@ -1,19 +1,23 @@
 class Obstacle {
-    constructor(env, start_x, start_y) {
-      this.x = start_x;
-      this.y = start_y;
-      
-      env.map[this.y][this.x].distance = Number.POSITIVE_INFINITY;
-      env.map[this.y][this.x].obstacle = true;
-      env.obstacles.push(this);
-      
-      this.show = function () {
-        env.background.fill(153, 102, 0);
-        env.background.circle(this.x, this.y, 1);
-      };
-    }
-  } 
+  constructor(environment, x, y) {
+    this.environment = environment;
+    const cell = environment.getCell(x, y);
+    if (!cell || cell.isBlocked()) return;
+    this.x = cell.x;
+    this.y = cell.y;
+    cell.obstacle = true;
+    cell.distance = Infinity;
+    environment.obstacles.push(this);
+    environment.geometryDirty = true;
+    environment.backgroundDirty = true;
+  }
 
-if (typeof module !== "undefined") {
-    module.exports = Obstacle;
+  show() {
+    const graphics = this.environment.background;
+    if (!graphics) return;
+    graphics.fill(153, 102, 0);
+    graphics.rect(this.x, this.y, this.environment.SCALE, this.environment.SCALE);
+  }
 }
+
+if (typeof module !== 'undefined') module.exports = Obstacle;

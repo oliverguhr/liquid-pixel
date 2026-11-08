@@ -1,53 +1,44 @@
 class Player {
-  constructor(env) {
+  constructor(environment) {
+    this.environment = environment;
     this.x = 0;
     this.y = 0;
-    this.playerScale = 4 * env.SCALE;
-    
     this.dx = 0;
     this.dy = 0;
+    this.playerScale = 4 * environment.SCALE;
+  }
 
-    this.pos = function () {
-      this.dx = Math.floor(mouseX);
-      this.dy = Math.floor(mouseY);
+  setTarget(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) {
+      throw new TypeError('target coordinates must be finite numbers');
     }
+    this.dx = Math.floor(x);
+    this.dy = Math.floor(y);
+  }
 
-    this.update = function () {
-      this.getCellsInDistance(false,this.x,this.y);
+  pos() {
+    this.setTarget(mouseX, mouseY);
+  }
 
-      this.x = constrain(this.dx, 0, env.FIELD_X - env.SCALE);
-      this.y = constrain(this.dy, 0, env.FIELD_Y - env.SCALE);
+  dir(x, y) {
+    this.setTarget(this.x + x * this.environment.SPEED, this.y + y * this.environment.SPEED);
+    this.update();
+  }
 
-      this.getCellsInDistance(true,this.x,this.y);
-    };
+  update() {
+    const environment = this.environment;
+    this.x = Math.max(0, Math.min(environment.FIELD_X - environment.SCALE, this.dx));
+    this.y = Math.max(0, Math.min(environment.FIELD_Y - environment.SCALE, this.dy));
+  }
 
-    this.show = function () {
-      env.foreground.fill(150);
-      env.foreground.circle(this.x, this.y,  this.playerScale);
-    };
-
-    this.getCellsInDistance = function (bool, dx,dy) {
-      let current =  env.map[dy][dx];
-      current.player = bool;
-      
-      let row = dy;
-      let col = dx;
-      let r = this.playerScale;
-
-      for (let y = row - r; y <= row + r; y++) {
-        for (let x = col - r; x <= col + r; x++) {
-            let cell = env.getCell(x,y)
-            if (r >= dist(dx,dy,x,y) && cell != undefined) {
-                cell.player = bool;
-                if(bool == true) {
-                    cell.distance = Number.POSITIVE_INFINITY
-                }
-            }
-        }
-      }  
-    };
+  show() {
+    const graphics = this.environment.foreground;
+    if (!graphics) return;
+    graphics.noFill();
+    graphics.stroke(150);
+    graphics.circle(this.x, this.y, this.playerScale);
+    graphics.noStroke();
   }
 }
-if (typeof module !== "undefined") {
-    module.exports = Player;
-}
+
+if (typeof module !== 'undefined') module.exports = Player;

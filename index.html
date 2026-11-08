@@ -1,20 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Liquidity</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/p5@1.6.0/lib/p5.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b131b">
+    <meta name="description" content="A little world of collective motion. Guide a thousand tiny particles and shape the paths they take.">
+    <title>Liquid Pixel — Swarm playground</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230b131b'/%3E%3Cpath d='M16 5C12 11 7 15 7 20a9 9 0 0 0 18 0c0-5-5-9-9-15Z' fill='%238df6dc'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="style.css">
-    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/p5@1.4.1/lib/addons/p5.sound.min.js"></script>-->
-    
-    <script type="text/javascript" src="Environment.js"></script>
-    <script type="text/javascript" src="Cell.js"></script>
-    <script type="text/javascript" src="Player.js"></script>
-    <script type="text/javascript" src="Particle.js"></script>
-    <script type="text/javascript" src="Obstacle.js"></script>
-    <script type="text/javascript" src="Game.js"></script>
-
+    <script defer src="node_modules/p5/lib/p5.min.js"></script>
+    <script defer src="Cell.js"></script>
+    <script defer src="Player.js"></script>
+    <script defer src="Particle.js"></script>
+    <script defer src="Obstacle.js"></script>
+    <script defer src="Environment.js"></script>
+    <script defer src="Renderer.js"></script>
+    <script defer src="Game.js"></script>
+    <script defer src="Harness.js"></script>
   </head>
   <body>
+    <svg class="icon-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+      <symbol id="icon-pointer" viewBox="0 0 24 24"><path d="m5 3 14 9-7 1-3 7-4-17Z"/></symbol>
+      <symbol id="icon-draw" viewBox="0 0 24 24"><path d="m14 5 5 5M4 20l5-1L20 8a2 2 0 0 0-5-5L4 14l-1 6h1Z"/></symbol>
+      <symbol id="icon-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+      <symbol id="icon-clear" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></symbol>
+      <symbol id="icon-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/></symbol>
+    </svg>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="/" aria-label="Liquid Pixel home">
+          <svg class="brand-mark" viewBox="0 0 36 40" aria-hidden="true"><path d="M18 2C13 11 4 17 4 25a14 14 0 0 0 28 0C32 17 23 11 18 2Z" fill="currentColor"/><circle cx="23" cy="27" r="5" fill="#0b131b" fill-opacity=".24"/></svg>
+          <span>liquid<span class="brand-light">pixel</span><span class="brand-dot">.</span></span>
+        </a>
+        <div class="mode-label"><span class="tiny-dot"></span>Single player <span class="mode-divider">/</span> Free play</div>
+        <button id="pause-button" class="button button-quiet" type="button" aria-pressed="false">
+          <svg class="icon" aria-hidden="true"><use id="pause-icon" href="#icon-pause"/></svg>
+          <span id="pause-label">Pause</span>
+        </button>
+      </header>
+
+      <main class="workspace">
+        <section class="field-section" aria-labelledby="playground-title">
+          <div class="field-wrap">
+            <div class="field-heading">
+              <div><p class="eyebrow">THE PLAYGROUND</p><h1 id="playground-title">Find your flow.</h1></div>
+              <span class="live-indicator" id="simulation-status"><span></span><span id="simulation-label">Live</span></span>
+            </div>
+            <div class="field-frame" id="field-frame">
+              <div id="canvas-host" aria-label="Interactive swarm playfield"></div>
+              <div id="empty-state" class="empty-state">
+                <span class="empty-orbit" aria-hidden="true"><svg class="icon"><use href="#icon-spark"/></svg></span>
+                <h2>A thousand tiny possibilities.</h2>
+                <p>Spawn a swarm. Give it a direction.</p>
+              </div>
+              <div class="canvas-caption" aria-hidden="true"><span><span class="map-dot"></span><span id="map-label">Open field</span></span><span>LIQUID / 01</span></div>
+            </div>
+            <div class="field-footer">
+              <span><svg class="icon" aria-hidden="true"><use href="#icon-pointer"/></svg>Move to guide <span class="footer-dot">·</span> Drag to draw</span>
+              <span class="keyboard-hint"><kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd><span>to steer</span></span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="Swarm controls">
+          <div class="panel-heading"><span class="eyebrow">YOUR LITTLE UNIVERSE</span><span class="panel-orbit" aria-hidden="true">✳</span></div>
+          <h2>Make a path.<br> Watch it flow.</h2>
+          <p class="panel-intro">A thousand individuals.<br> A direction only you decide.</p>
+          <div class="swarm-stat"><span class="stat-label">ACTIVE UNITS</span><strong id="particle-count" aria-live="polite">0</strong><span class="stat-caption">small pieces of a bigger picture</span></div>
+          <button id="spawn-button" class="button button-primary" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-spark"/></svg><span>Spawn swarm</span><svg class="icon spawn-arrow" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+          <p id="spawn-note" class="button-note">Start with 1,000 little explorers.</p>
+          <div class="panel-divider"></div>
+          <div class="legend"><span><i class="legend-swarm"></i>Your swarm</span><span><i class="legend-terrain"></i>Terrain</span></div>
+          <div class="how-to" id="how-to">
+            <h3>A little guidance</h3>
+            <div class="tip"><span class="tip-icon"><svg class="icon" aria-hidden="true"><use href="#icon-pointer"/></svg></span><div><strong>Lead the way</strong><p>Move your cursor. The swarm will find its own way to you.</p></div></div>
+            <div class="tip"><span class="tip-icon"><svg class="icon" aria-hidden="true"><use href="#icon-draw"/></svg></span><div><strong>Shape the terrain</strong><p>Click and drag to draw obstacles. See how the flow adapts.</p></div></div>
+          </div>
+          <button id="clear-button" class="button button-clear" type="button"><svg class="icon" aria-hidden="true"><use href="#icon-clear"/></svg><span>Clear terrain</span></button>
+        </aside>
+      </main>
+      <footer class="app-footer"><span>An experiment in collective motion.</span><a href="#how-to">How to play <span aria-hidden="true">↗</span></a></footer>
+    </div>
   </body>
 </html>

@@ -4,13 +4,25 @@
   "description": "Fun implementation of Liquid War based on https://ufoot.org/liquidwar/v5/techinfo/algorithm",
   "main": "Cell.js",
   "scripts": {
-    "test": "jest"
+    "start": "node scripts/serve.cjs",
+    "test": "jest",
+    "test:browser": "playwright test",
+    "test:all": "npm test -- --runInBand && npm run test:browser",
+    "play:agent": "node scripts/play.cjs",
+    "play:preview": "node scripts/preview-swarm.cjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "dependencies": {
+    "p5": "1.6.0"
+  },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "jest": "^29.7.0"
+  },
+  "jest": {
+    "testMatch": ["**/__tests__/**/*.test.js"]
   }
 }

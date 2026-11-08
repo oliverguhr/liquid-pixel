@@ -1,66 +1,30 @@
 class Particle {
-  constructor(start_x, start_y) {
-    this.x = Math.floor(random(start_x, start_x + env.FIELD_X * 0.1 - env.SCALE ));
-    this.y = Math.floor(random(start_y, start_y + env.FIELD_Y * 0.1 - env.SCALE ));
+  constructor(x, y, environment) {
+    const cell = environment.getCell(x, y);
+    if (!cell || cell.isBlocked()) throw new RangeError('Particle needs a free cell');
+    this.environment = environment;
+    this.id = environment.nextParticleId++;
+    const identity = Math.imul(this.id + 1, 0x9e3779b1) >>> 0;
+    this.phase = identity & 63;
+    this.shade = 210 + ((identity >>> 8) % 46);
+    this.x = cell.x;
+    this.y = cell.y;
     this.xspeed = 0;
     this.yspeed = 0;
-    // place particle on the current cell
-    env.map[this.y][this.x].particle = this;
-    
-    this.updateDirection = function () {
-      //schau dir alle zellen in der umgebung an und finde die Zelle mit den niedrigsten wert
-      let row = this.y;
-      let col = this.x;
-      let min = {distance : Number.POSITIVE_INFINITY}
+    this.credit = 0;
+    cell.particle = this;
+  }
 
-      for (let y = row - 1; y <= row + 1; y++) {
-        for (let x = col - 1; x <= col + 1; x++) {
-            // ignoriere die aktuelle Zelle
-                if (y === row && x === col) {
-                    continue;
-                }
+  update() {
+    return this.environment.moveParticle(this);
+  }
 
-                let cell = env.getCell(x, y);
-              // müsste nicht hier der speed + random schon hinzugefügt werden ? 
-              if (cell != undefined && cell.distance <= min.distance){
-                  min.distance = cell.distance;
-                  this.xspeed = x - col;  
-                  this.yspeed = y - row;  // leedcode lol
-              }
-          }
-      }
-    }        
-
-
-    this.update = function () {
-      this.updateDirection(env.player.x, env.player.y)
-      
-      env.map[this.y][this.x].particle = undefined;
-
-      let dx = Math.floor(this.x + this.xspeed * env.SPEED * random(0.5,2));
-      let dy = Math.floor(this.y + this.yspeed * env.SPEED * random(0.5,2));
-
-      let cell = env.getCell(dx,dy)  
-      if  (cell != undefined && !cell.isBlocked()) {
-        this.x = dx;
-        this.y = dy;
-      }
-
-      this.x = constrain(this.x, 0, env.FIELD_X - env.SCALE);
-      this.y = constrain(this.y, 0, env.FIELD_Y - env.SCALE);
-
-      env.map[this.y][this.x].particle = this;
-    };
-
-
-
-
-    this.show = function () {
-      env.foreground.fill('white');
-      env.foreground.circle(this.x, this.y, env.SCALE);
-    };
+  show() {
+    const graphics = this.environment.foreground;
+    if (!graphics) return;
+    graphics.fill(this.shade);
+    graphics.rect(this.x, this.y, this.environment.SCALE, this.environment.SCALE);
   }
 }
-if (typeof module !== "undefined") {
-    module.exports = Particle;
-}
+
+if (typeof module !== 'undefined') module.exports = Particle;
