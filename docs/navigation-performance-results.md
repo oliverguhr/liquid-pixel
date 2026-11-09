@@ -162,8 +162,9 @@ werden weiterhin die festen Replays verwendet.
   mit ausschließlich Richtungscache. Der laufende LAN-Server auf Port 4173
   liefert diese Fassung bereits aus.
 
-Die Protokollversion bleibt `liquid-pixel-lockstep-2`, weil die Änderungen
-dieselben spielentscheidenden Zustände und Wegwerte liefern. Die gemessenen
+Die Protokollversion blieb bei diesen Messungen `liquid-pixel-lockstep-2`,
+weil die Änderungen dieselben spielentscheidenden Zustände und Wegwerte
+liefern. Die gemessenen
 Prozente beschreiben Simulationszeit auf dem Messrechner, keine entsprechende
 FPS-Zusage auf anderen Geräten.
 

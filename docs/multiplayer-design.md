@@ -94,9 +94,11 @@ entstehen. Es werden keine Partikel verschoben oder gelöscht, um Hindernisse
 einzusetzen; die Karte entsteht vor dem Spawn.
 
 Beide Clients erzeugen dieselbe Karte und nehmen ihre Hindernisse in die
-Zustandsprüfsumme auf. Die Protokollversion ist jetzt
-`liquid-pixel-lockstep-2`; nach dieser Änderung sind ein Serverneustart und
-ein Neuladen beider Browser erforderlich.
+Zustandsprüfsumme auf. Das Gelände wurde mit `liquid-pixel-lockstep-2`
+eingeführt. Die begrenzte seitliche Ausweichbewegung für eine rundere Wolke
+verwendet seit dem 9. November `liquid-pixel-lockstep-3`. Nach Änderungen der
+Simulationsversion sind ein Serverneustart und ein Neuladen beider Browser
+erforderlich.
 
 ## Protokoll und Takt
 

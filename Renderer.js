@@ -77,7 +77,8 @@ class Renderer {
     if (this.sprites.has(key)) return this.sprites.get(key);
     const { canvas, context } = this.surface(size, size);
     const center = size / 2;
-    const radius = size * 0.37;
+    // Leave a clear gap between neighbouring dots, like the lobby illustration.
+    const radius = size * 0.27;
     const brightness = (shade - 210) / 45;
     const gradient = context.createRadialGradient(center - radius * 0.25, center - radius * 0.3, 0, center, center, radius);
     const colors = team === 1
@@ -102,8 +103,8 @@ class Renderer {
     const radius = extent / 2;
     const gradient = context.createRadialGradient(radius, radius, 0, radius, radius, radius);
     const color = team === 1 ? '255,100,126' : '80,190,255';
-    gradient.addColorStop(0, `rgba(${color},0.09)`);
-    gradient.addColorStop(0.35, `rgba(${color},0.025)`);
+    gradient.addColorStop(0, `rgba(${color},0.06)`);
+    gradient.addColorStop(0.35, `rgba(${color},0.015)`);
     gradient.addColorStop(1, `rgba(${color},0)`);
     context.fillStyle = gradient;
     context.fillRect(0, 0, extent, extent);

@@ -14,7 +14,7 @@ der vorherigen konkretisiert. Für Phase 1 gelten keine Performancevorgaben.
 
 ## Fehlerstatus der Bewegung
 
-Stand: 8. November 2026. Die technischen Nachweise stehen in
+Stand: 9. November 2026. Die technischen Nachweise stehen in
 [docs/movement-validation.md](docs/movement-validation.md).
 
 | Fehler | Stand und Absicherung |
@@ -23,7 +23,7 @@ Stand: 8. November 2026. Die technischen Nachweise stehen in
 | Pixel bleiben vor Hindernissen hängen | Korrigiert: Hindernisbewusstes Distanzfeld mit lokalen Ausweichrichtungen. Wand, U und eine Öffnung von genau einer Partikelbreite werden im Browser durchlaufen. |
 | Pixel kleben an Rändern und Ecken | Korrigiert und an allen vier Seiten sowie Ecken geprüft, auch mit 1.000 Partikeln und mehreren aufeinanderfolgenden Zielwechseln. |
 | Große Schritte überspringen dünne Wände | Korrigiert: ausschließliche Nachbarschritte mit Prüfung jeder Teilbewegung. Gesperrte diagonale Ecken werden nicht geschnitten. |
-| Raute beziehungsweise Viereck statt Kreis | Korrigiert: euklidisch korrigiertes Potential erhält Umwegkosten und entfernt den Winkelbias im freien Feld. 16 Winkelsektoren und die Füllung des Innenkreises werden geprüft. |
+| Raute, Viereck beziehungsweise Achteck statt Kreis | Korrigiert: euklidisch korrigiertes Potential und begrenztes seitliches Abdriften erhalten eine runde Wolke. 32 Winkelsektoren mit höchstens 6 % Radiusunterschied und die Füllung des Innenkreises werden geprüft. |
 | Wolke wird wie ein starrer Ausschnitt verschoben | Überarbeitet: eigene Bewegungstakte, wechselnde lokale Prioritäten und getrennt gezeichnete Halbschritte. IDs und unterschiedliche Verschiebungsvektoren sichern tatsächliche Einzelbewegung ab. Der Nutzer hat die Fassung vorerst akzeptiert. |
 | Schnelles Malen erzeugt Lücken; Button malt auf dem Spielfeld | Korrigiert: kontinuierlicher Strich bis zum Rand und Beginn des Malens nur auf dem Canvas. Belegte Zellen werden geschützt. |
 
@@ -92,8 +92,16 @@ liegt nach `npm run play:preview` unter
 - [x] Eine responsive Oberfläche mit Einheitenzähler, Spawn, Pause/Fortsetzen
   und Löschen der Hindernisse gestalten.
 - [x] Eingaben bei skaliertem Canvas sowie Desktop- und schmale Ansichten prüfen.
+- [x] Den Look der Lobby ins Spiel übertragen: kleinere runde Partikel mit
+  deutlichen Zwischenräumen und erhaltenem Leuchten. Seitliches Abdriften
+  begrenzen, damit die ruhende Wolke keine achteckigen Kanten entwickelt.
 
 Nachweise und Vorschauen: [docs/presentation-validation.md](docs/presentation-validation.md).
+
+Ergänzung vom 9. November: Runde Partikel und eine rundere ruhende Wolke sind
+mit 68 Modell-/Serverprüfungen und allen 45 Browserfällen geprüft. Der LAN-Server
+auf Port 4173 wurde mit `liquid-pixel-lockstep-3` neu gestartet; beide Browser
+müssen neu geladen werden.
 
 ### Weitere Qualität bei Bedarf
 

@@ -283,8 +283,11 @@ class Environment {
       if (compareMain(navigable[index], main) < 0) main = navigable[index];
     }
     if (!main) return null;
+    // Allow small sideways detours (three tenths of a cell's potential), but avoid
+    // drifting far enough uphill to flatten a resting circle into an octagon.
     const candidates = navigable.filter(neighbour =>
-      potential(neighbour.cell) < potential(current) || main.dx * neighbour.dx + main.dy * neighbour.dy >= 0);
+      potential(neighbour.cell) < potential(current)
+      || (main.dx * neighbour.dx + main.dy * neighbour.dy >= 0 && potential(neighbour.cell) <= potential(current) + 300));
     candidates.sort((a, b) => {
       const classOf = item => item === main ? 0 : potential(item.cell) < potential(current) ? 1 : 2;
       return classOf(a) - classOf(b) || potential(a.cell) - potential(b.cell) || rank(a) - rank(b);

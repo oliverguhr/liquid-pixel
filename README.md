@@ -43,8 +43,9 @@ The responsive interface has a live unit count, Pause/Resume and Clear terrain
 controls. The canvas renders at a minimum of 1600×1600 backing pixels, rising
 to 2400×2400 on displays with a pixel density of 3. The logical world remains
 800×800, so changing display size or density does not change the simulation.
-`Renderer.js` provides shaded round blue motes, cached glow, a quiet background
-grid, outlined terrain and the cursor. Soft light is accumulated on a separate
+`Renderer.js` provides shaded round motes with clear gaps like the lobby artwork,
+cached glow, a quiet background grid, outlined terrain and the cursor.
+Soft light is accumulated on a separate
 400×400 surface and scaled up; particle cores and terrain keep their HiDPI
 resolution. It uses no random numbers or movement
 updates. Pointer coordinates are mapped from the displayed canvas into the
@@ -73,9 +74,10 @@ Each team reuses its eight deterministic direction orders per visited cell;
 terrain and target changes invalidate these choices.
 Current particle occupancy is checked on every movement and contact action.
 
-Free-space attraction uses a Euclidean correction so the resting swarm forms
-a circle. Individual movement phases and local update priorities avoid moving
-the whole cloud as a rigid shape. Subtle, stable pixel shades make individual
+Free-space attraction uses a Euclidean correction and limits sideways drift
+away from the target so the resting swarm forms a circle. Individual movement
+phases and local update priorities avoid moving the whole cloud as a rigid
+shape. Subtle, stable pixel shades make individual
 units visible. These phases are deterministic; movement uses no fresh random
 numbers. Randomness only determines the seeded spawn order.
 

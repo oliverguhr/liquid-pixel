@@ -3,7 +3,7 @@ const MatchMath = typeof module !== 'undefined' ? require('./Determinism') : Det
 const MatchMap = typeof module !== 'undefined' ? require('./MatchTerrain') : MatchTerrain;
 
 const MatchSimulation = (() => {
-  const VERSION = 'liquid-pixel-lockstep-2';
+  const VERSION = 'liquid-pixel-lockstep-3';
   const defaults = Object.freeze({ version: VERSION, width: 800, height: 800, scale: 4,
     speed: 8, particleCount: 1000, seed: 1 });
 

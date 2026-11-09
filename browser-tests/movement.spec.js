@@ -171,20 +171,20 @@ test('using the spawn control at a narrower viewport does not paint terrain', as
   expect(state.obstacles).toHaveLength(0);
 });
 
-test('a resting swarm forms a filled circle rather than a diamond', async ({ page }, testInfo) => {
+test('a resting swarm forms a filled circle rather than a diamond or octagon', async ({ page }, testInfo) => {
   await spawn(page, 400, 400);
   const state = await page.evaluate(() => gameHarness.step(200));
   healthy(state, 1000);
-  const radii = Array.from({ length: 16 }, () => 0);
+  const radii = Array.from({ length: 32 }, () => 0);
   const occupied = new Set();
   for (const particle of state.particles) {
     const dx = particle.x - 400;
     const dy = particle.y - 400;
-    const sector = Math.floor((Math.atan2(dy, dx) + Math.PI) * 16 / (2 * Math.PI)) % 16;
+    const sector = Math.floor((Math.atan2(dy, dx) + Math.PI) * radii.length / (2 * Math.PI)) % radii.length;
     radii[sector] = Math.max(radii[sector], Math.hypot(dx, dy));
     occupied.add(`${particle.x},${particle.y}`);
   }
-  expect(Math.max(...radii) / Math.min(...radii)).toBeLessThan(1.15);
+  expect(Math.max(...radii) / Math.min(...radii)).toBeLessThan(1.06);
   expect(Math.max(...radii)).toBeLessThan(82);
   let interior = 0;
   let filled = 0;

@@ -91,8 +91,9 @@ des Geländes bei gleichbleibenden Zielen erneuert werden, und dass beide
 Teams Licht außerhalb ihrer Partikelkerne zeigen. Nach Entfernen der
 Partikel darf kein alter Lichtabdruck stehen bleiben.
 
-Die Protokollversion bleibt `liquid-pixel-lockstep-2`: Die Optimierungen
-verändern keine Regeln, und die Vergleichsläufe liefern identische Zustände.
+Die Protokollversion blieb bei diesen Messungen `liquid-pixel-lockstep-2`:
+Die Optimierungen verändern keine Regeln, und die Vergleichsläufe liefern
+identische Zustände.
 Abschließend bestanden **60 Modell-/Servertests und alle 45 Browserfälle**.
 Die Browserfälle umfassen Chromium, Firefox, WebKit und Node mit identischen
 vollständigen Zuständen, gemischte Browser-Matches, Eingabeverzögerung,
