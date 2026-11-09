@@ -9,6 +9,7 @@ class Cell {
     this.particle = undefined;
     this.obstacle = false;
     this.neighbours = [];
+    this.walkableNeighbours = [];
   }
 
   isBlocked() {

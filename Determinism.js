@@ -8,11 +8,10 @@ const Determinism = (() => {
   }
 
   function distance(x, y) {
-    const a = Math.min(Math.abs(x), Math.abs(y));
-    const b = Math.max(Math.abs(x), Math.abs(y));
-    const key = `${a},${b}`;
-    if (distances.has(key)) return distances.get(key);
-    const squared = (a * a + b * b) * 1000000;
+    // Equal squared lengths share the same exact rounded distance.
+    const squared = (x * x + y * y) * 1000000;
+    const cached = distances.get(squared);
+    if (cached !== undefined) return cached;
     if (!Number.isSafeInteger(squared)) throw new RangeError('Distance exceeds integer precision');
     let low = 0;
     let high = 1;
@@ -24,7 +23,7 @@ const Determinism = (() => {
     }
     // For integer n: sqrt(n) >= k + 1/2 exactly when n - k*k > k.
     const result = low + (squared - low * low > low ? 1 : 0);
-    distances.set(key, result);
+    distances.set(squared, result);
     return result;
   }
 

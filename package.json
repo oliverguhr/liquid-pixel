@@ -11,7 +11,13 @@
     "play:agent": "node scripts/play.cjs",
     "play:preview": "node scripts/preview-swarm.cjs",
     "play:capture": "node scripts/preview-capture.cjs",
-    "play:multiplayer": "node scripts/preview-multiplayer.cjs"
+    "play:multiplayer": "node scripts/preview-multiplayer.cjs",
+    "profile:model": "node --cpu-prof --cpu-prof-dir=artifacts/performance --cpu-prof-name=model.cpuprofile scripts/profile-model.cjs",
+    "profile:multiplayer": "node scripts/profile-multiplayer.cjs",
+    "profile:rendering": "node scripts/profile-rendering.cjs",
+    "compare:model": "node scripts/compare-model.cjs",
+    "compare:rendering": "node scripts/compare-rendering.cjs",
+    "compare:ui": "node scripts/compare-ui.cjs"
   },
   "keywords": [],
   "author": "",

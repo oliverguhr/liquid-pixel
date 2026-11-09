@@ -3,6 +3,11 @@
 Stand: 7. November 2026. Untersucht wurde der C-Code von Liquid War **5.6.6**,
 heruntergeladen und gelesen, aber nicht gebaut oder ausgeführt.
 
+Ergänzung vom 9. November: Die [Untersuchung der Performance-Tricks](liquid-war-performance.md)
+beschreibt das adaptive Mesh, schrittweise Feldaktualisierung, den abgesenkten
+Cursorwert, gemeinsam verwendete Richtungen sowie Daten- und Renderingtricks.
+Sie trennt Originalbefunde von möglichen weiteren Optimierungen unseres Spiels.
+
 ## Quellen und Wiederauffindbarkeit
 
 - [Offizielle Downloadseite](https://ufoot.org/liquidwar/v5/download/en/)

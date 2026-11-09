@@ -4,6 +4,7 @@ class Renderer {
     this.density = density;
     this.environment = null;
     this.backdrop = null;
+    this.glowLayer = null;
     this.sprites = new Map();
     this.glows = new Map();
   }
@@ -16,12 +17,12 @@ class Renderer {
     this.glows.clear();
   }
 
-  surface(width, height) {
+  surface(width, height, density = this.density) {
     const canvas = document.createElement('canvas');
-    canvas.width = Math.round(width * this.density);
-    canvas.height = Math.round(height * this.density);
+    canvas.width = Math.round(width * density);
+    canvas.height = Math.round(height * density);
     const context = canvas.getContext('2d');
-    context.scale(this.density, this.density);
+    context.scale(density, density);
     return { canvas, context };
   }
 
@@ -65,6 +66,8 @@ class Renderer {
       context.stroke();
     }
     this.backdrop = canvas;
+    // Soft light needs fewer pixels than the crisp particle cores and terrain.
+    this.glowLayer = this.surface(width, height, 0.5);
     this.environment = environment;
     environment.backgroundDirty = false;
   }
@@ -95,7 +98,7 @@ class Renderer {
     const key = `${size}:${team}`;
     if (this.glows.has(key)) return this.glows.get(key);
     const extent = size * 6;
-    const { canvas, context } = this.surface(extent, extent);
+    const { canvas, context } = this.surface(extent, extent, 0.5);
     const radius = extent / 2;
     const gradient = context.createRadialGradient(radius, radius, 0, radius, radius, radius);
     const color = team === 1 ? '255,100,126' : '80,190,255';
@@ -119,11 +122,15 @@ class Renderer {
     context.drawImage(this.backdrop, 0, 0, width, height);
     context.imageSmoothingEnabled = true;
 
-    // Cached small sprites avoid filtering the full HiDPI surface every frame.
-    context.globalCompositeOperation = 'lighter';
+    // Accumulate soft light at half world resolution, then blend it once.
+    const light = this.glowLayer.context;
+    light.clearRect(0, 0, width, height);
+    light.globalCompositeOperation = 'lighter';
     for (const particle of environment.particles) {
-      context.drawImage(this.glowSprite(size, particle.team), particle.x - size * 2.5, particle.y - size * 2.5, size * 6, size * 6);
+      light.drawImage(this.glowSprite(size, particle.team), particle.x - size * 2.5, particle.y - size * 2.5, size * 6, size * 6);
     }
+    context.globalCompositeOperation = 'lighter';
+    context.drawImage(this.glowLayer.canvas, 0, 0, width, height);
     context.globalCompositeOperation = 'source-over';
     for (const particle of environment.particles) {
       context.globalAlpha = 0.5 + 0.5 * particle.health / environment.combat.maxHealth;

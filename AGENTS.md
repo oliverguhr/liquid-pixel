@@ -43,6 +43,8 @@ stabilen Singleplayer ausgearbeitet.
 
 - Browser-Spiel mit p5.js; Einstieg über `index.html` und `Game.js`.
 - `Environment.js`: Spielfeld, Aktualisierung, Distanzfeld und Hindernisse.
+- Die Richtungsauswahl pro Team/Zelle wird in acht deterministischen Varianten
+  wiederverwendet und bei neuen Wegfeldern verworfen; Belegung immer live prüfen.
 - `Particle.js`, `Player.js`, `Cell.js`, `Obstacle.js`: Spielobjekte.
 - Jeder Partikel hat `team` und `health`. `Environment.teams` hält getrennte
   Ziele und Distanzfelder. `env.player` ist weiterhin das Mausziel von Team 0;
@@ -77,6 +79,8 @@ stabilen Singleplayer ausgearbeitet.
 - `Renderer.js`: normale HiDPI-Darstellung mit zwischengespeicherten Effekten;
   Änderungen an der Optik hier umsetzen. Die Darstellung darf keine
   Partikelpositionen, Zufalls-Seeds oder Bewegungstakte verändern.
+  Der Nutzer möchte die Leuchteffekte bei Performanceverbesserungen behalten;
+  eine günstigere Umsetzung muss Leuchten und scharfe Partikelkerne erhalten.
 - `__tests__/`: Jest-Tests; `browser-tests/`: Playwright-Tests.
 - Das Raster wird als `map[y][x]` angesprochen. Positionswerte sind
   Spielkoordinaten; Mausereignisse im Browser müssen den Canvas-Offset beachten.

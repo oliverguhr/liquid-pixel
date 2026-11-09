@@ -179,9 +179,68 @@ Vorschau: `artifacts/multiplayer-preview/random-terrain.png`.
 Der Nutzer hat den Test im lokalen Netzwerk auf zwei Computern am
 8. November 2026 als funktionierend bestätigt.
 
+## Performance nach dem ersten LAN-Test
+
+Der Nutzer meldet ein ausgelastetes Notebook und Ruckler bei zwei Spielern.
+Die [Performanceanalyse](docs/performance-analysis.md) enthält Messwerte,
+Fundstellen und einfache Verbesserungsvorschläge. Lesbarkeit und die
+bisherige Synchronität bleiben verbindlich.
+
+- [x] Simulation mit festen Eingaben profilieren und zwei echte Clients messen.
+- [x] Serverlast separat messen und Leuchteffekte als Grafik-Kosten isolieren.
+- [x] Reproduzierbare Messbefehle und priorisierte Empfehlungen dokumentieren.
+- [x] Optimierungen nach erwartetem Gewinn mit Aufwand und Unsicherheit
+  [auflisten](docs/performance-analysis.md#optimierungsliste-nach-erwartetem-gewinn).
+- [x] Die acht begrenzten Optimierungen zum Ausprobieren ausgewählt.
+
+Die acht Versuche wurden einzeln umgesetzt und gemessen. Die
+[Ergebnisse je Schritt](docs/performance-results.md) enthalten die Entscheidung
+und den abschließenden Gesamtvergleich. Die Reihenfolge stammt aus der
+vorläufigen Einschätzung:
+
+1. [x] Leuchteffekte auf einer separaten Ebene mit geringerer Auflösung
+   zeichnen. Das Leuchten ausdrücklich erhalten; Partikelkerne bleiben scharf.
+2. [x] Statische begehbare Nachbarverbindungen für Wegfelder und Bewegung
+   wiederverwenden; bei Geländeänderungen erneuern.
+3. [x] Die erste Nachbarsortierung durch eine gleichwertige Minimumsuche ersetzen.
+4. [x] Sortierschlüssel pro Partikel und Bewegungsrunde vorberechnen.
+5. [x] Den vorhandenen Distanzcache mit numerischen Schlüsseln vereinfachen.
+6. [x] Freie Zielzellen in ihrer eigenen Komponente direkt verwenden.
+7. [x] Cache sortierter Hindernisse in Zustandsberichten ausprobiert und
+   verworfen: einzelne Berichte günstiger, aber kein belastbarer Gesamtnutzen.
+8. [x] Unveränderte Lobby-/Statusanzeigen seltener ins DOM schreiben.
+
+Gesamtvergleich: rund 35–40 % weniger Simulationszeit und 50–71 % weniger
+Zeichenzeit im Software-Renderer. 60 Modell-/Serverprüfungen und alle 45
+Browserfälle bestanden, einschließlich gleicher Zustände in Chromium,
+Firefox, WebKit und Node. Das lange Replay erhält die bisherigen Prüfsummen.
+Die reale Bildrate im automatisierten Zwei-Client-Lauf steigt bei bewegten
+Zielen von etwa 19 auf 23 FPS; Hardware-Rendering auf dem Notebook ist damit
+nicht vermessen.
+
+Inkrementelle Wegfelder über mehrere Takte bleiben eine Reserveoption.
+Die Analyse beschreibt deren Grenzen. Jede spätere Umsetzung muss lesbar
+bleiben und anhand der Messungen, des Spielverhaltens und der Synchronität
+einzeln geprüft werden.
+
+- [x] Originalcode erneut gezielt auf Performance-Tricks untersuchen und
+  [Fundstellen sowie Übertragbarkeit](docs/liquid-war-performance.md) dokumentieren:
+  adaptives Mesh, fortlaufende Gradienten, Cursorwert, Richtungstabellen und
+  Darstellung. Das ist eine Untersuchung, keine Umsetzung weiterer Optimierungen.
+- [x] Die Richtungsauswahl wiederverwenden: rund 47–54 % weniger Simulation
+  bei stehenden Zielen/Kontakt und 8 % bei bewegten Zielen, identische Zustände.
+  Im normalen Browserlauf rund 25 % weniger Simulationszeit bei stehenden
+  Zielen und 20 % im Kontakt; kein klarer Vorteil bei bewegten Zielen.
+- [x] Adaptives Navigationsmesh ausprobieren und messen: in Node zusätzlich
+  7–12 % weniger Simulation bei bewegten Zielen auf drei Karten, im echten
+  Browser jedoch langsamer (rund 15 statt 23 FPS). Mesh deshalb verworfen,
+  Richtungscache behalten. Nachweise und Grenzen in
+  [navigation-performance-results.md](docs/navigation-performance-results.md).
+- [x] Endgültigen Stand erneut prüfen: 68 Modell-/Servertests und alle
+  45 Browserfälle bestanden; der LAN-Server liefert die geprüfte Fassung.
+
 ## Spätere Aufgaben
 
-- [ ] Performance erst bei konkretem Bedarf messen und Ziele vereinbaren.
 - [ ] Vorgefertigte Karten speichern und laden.
 - [ ] Dauerhafte Spielstatistik und Punktestand ergänzen; das reguläre Ende
   durch vollständige Übernahme ist im Mehrspielermodus bereits vorhanden.

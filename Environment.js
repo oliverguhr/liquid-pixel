@@ -79,6 +79,7 @@ class Environment {
       id, player, stationary: id === 1, gradientTarget: '',
       distance: new Float64Array(this.cells.length),
       potential: new Float64Array(this.cells.length), navigationGoals: [],
+      movementCache: new Array(this.cells.length),
     }));
     // One contact action per logical frame, independently of movement speed.
     this.combat = Object.freeze({ maxHealth: 100, attack: 16, heal: 2, conversionHealth: 50 });
@@ -175,7 +176,11 @@ class Environment {
 
   updateComponents() {
     for (const team of this.teams) team.gradientTarget = '';
-    for (const cell of this.cells) cell.component = -1;
+    for (const cell of this.cells) {
+      cell.component = -1;
+      // Terrain changes invalidate these links; moving particles do not.
+      cell.walkableNeighbours = cell.neighbours.filter(neighbour => this.canTraverse(cell, neighbour));
+    }
     this.components = [];
     for (const start of this.cells) {
       if (start.obstacle || start.component !== -1) continue;
@@ -184,8 +189,8 @@ class Environment {
       start.component = component;
       for (let head = 0; head < queue.length; head++) {
         const cell = queue[head];
-        for (const neighbour of cell.neighbours) {
-          if (neighbour.cell.component === -1 && this.canTraverse(cell, neighbour)) {
+        for (const neighbour of cell.walkableNeighbours) {
+          if (neighbour.cell.component === -1) {
             neighbour.cell.component = component;
             queue.push(neighbour.cell);
           }
@@ -203,6 +208,7 @@ class Environment {
     if (this.geometryDirty) this.updateComponents();
     this.geometryDirty = false;
     team.gradientTarget = key;
+    team.movementCache = new Array(this.cells.length);
     const { distance: distances, potential: potentials } = team;
     distances.fill(Infinity);
     potentials.fill(Infinity);
@@ -210,13 +216,17 @@ class Environment {
     team.navigationGoals = [];
     for (let component = 0; component < this.components.length; component++) {
       const cells = this.components[component];
-      let goal = cells[0];
-      let minimum = Infinity;
-      for (const cell of cells) {
-        const distance = (cell.x - target.x) ** 2 + (cell.y - target.y) ** 2;
-        if (distance < minimum || (distance === minimum && cell.index < goal.index)) {
-          minimum = distance;
-          goal = cell;
+      let goal = target;
+      // In its own component, a free target is already the nearest cell.
+      if (target.component !== component) {
+        goal = cells[0];
+        let minimum = Infinity;
+        for (const cell of cells) {
+          const distance = (cell.x - target.x) ** 2 + (cell.y - target.y) ** 2;
+          if (distance < minimum || (distance === minimum && cell.index < goal.index)) {
+            minimum = distance;
+            goal = cell;
+          }
         }
       }
       distances[goal.index] = 0;
@@ -226,8 +236,8 @@ class Environment {
     while (queue.entries.length) {
       const { cell, distance } = queue.pop();
       if (distance !== distances[cell.index]) continue;
-      for (const neighbour of cell.neighbours) {
-        if (this.canTraverse(cell, neighbour) && distance + neighbour.cost < distances[neighbour.cell.index]) {
+      for (const neighbour of cell.walkableNeighbours) {
+        if (distance + neighbour.cost < distances[neighbour.cell.index]) {
           distances[neighbour.cell.index] = distance + neighbour.cost;
           queue.push(neighbour.cell, distances[neighbour.cell.index]);
         }
@@ -259,12 +269,19 @@ class Environment {
     const potential = cell => team.potential[cell.index];
     if (!Number.isFinite(team.distance[current.index]) || team.distance[current.index] === 0) return null;
     const rotation = (this.tick + particle.id) % 8;
+    // Navigation depends on terrain, target and eight deterministic tie orders,
+    // never on occupancy. Live movement/contact still checks the current owner.
+    const cached = team.movementCache[current.index] ??= new Array(8);
+    if (cached[rotation]) return cached[rotation];
     const sign = (this.tick + particle.id) % 2 ? 1 : -1;
     const rank = neighbour => (sign * (neighbour.direction - rotation) + 8) % 8;
-    const navigable = current.neighbours.filter(neighbour => this.canTraverse(current, neighbour));
-    navigable.sort((a, b) => (potential(a.cell) + a.cost * 100) - (potential(b.cell) + b.cost * 100)
-      || potential(a.cell) - potential(b.cell) || rank(a) - rank(b));
-    const main = navigable[0];
+    const navigable = current.walkableNeighbours;
+    const compareMain = (a, b) => (potential(a.cell) + a.cost * 100) - (potential(b.cell) + b.cost * 100)
+      || potential(a.cell) - potential(b.cell) || rank(a) - rank(b);
+    let main = navigable[0];
+    for (let index = 1; index < navigable.length; index++) {
+      if (compareMain(navigable[index], main) < 0) main = navigable[index];
+    }
     if (!main) return null;
     const candidates = navigable.filter(neighbour =>
       potential(neighbour.cell) < potential(current) || main.dx * neighbour.dx + main.dy * neighbour.dy >= 0);
@@ -272,7 +289,7 @@ class Environment {
       const classOf = item => item === main ? 0 : potential(item.cell) < potential(current) ? 1 : 2;
       return classOf(a) - classOf(b) || potential(a.cell) - potential(b.cell) || rank(a) - rank(b);
     });
-    return { main, candidates, good: candidates.filter(item => item !== main && potential(item.cell) < potential(current)).slice(0, 2) };
+    return cached[rotation] = { main, candidates, good: candidates.filter(item => item !== main && potential(item.cell) < potential(current)).slice(0, 2) };
   }
 
   moveParticle(particle) {
@@ -350,11 +367,16 @@ class Environment {
     for (let round = 0; round < Math.ceil((baseCredit * 1.2 + 13) / 10); round++) {
       // Individuals compete locally, with changing, deterministic priorities.
       // A strict front-to-back sweep would translate a dense cloud as one slab.
-      const order = this.particles.filter(particle => particle.credit >= 10);
-      const band = particle => Math.floor((this.teams[particle.team].potential[this.getCell(particle.x, particle.y).index] + this.tick * 177 % 2000) / 2000);
-      const priority = particle => Math.imul((particle.id + 1) ^ Math.imul(this.tick + round + 1, 374761393), 668265263) >>> 0;
-      order.sort((a, b) => band(a) - band(b) || priority(a) - priority(b) || a.id - b.id);
-      for (const particle of order) if (particle.update()) moved.add(particle);
+      const offset = this.tick * 177 % 2000;
+      const seed = Math.imul(this.tick + round + 1, 374761393);
+      // Positions may change between rounds, but never during this sort.
+      const order = this.particles.filter(particle => particle.credit >= 10).map(particle => ({
+        particle,
+        band: Math.floor((this.teams[particle.team].potential[this.getCell(particle.x, particle.y).index] + offset) / 2000),
+        priority: Math.imul((particle.id + 1) ^ seed, 668265263) >>> 0,
+      }));
+      order.sort((a, b) => a.band - b.band || a.priority - b.priority || a.particle.id - b.particle.id);
+      for (const { particle } of order) if (particle.update()) moved.add(particle);
     }
     // Newly captured units start acting for their new team on the next half-step.
     if (activeTeams.size > 1 || this.particles.some(particle => particle.health < this.combat.maxHealth)) {

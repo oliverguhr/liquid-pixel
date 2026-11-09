@@ -74,6 +74,28 @@ test('narrow view stays usable and pointer coordinates follow the scaled field',
   await page.screenshot({ path: path.join(output, 'mobile.png'), fullPage: true });
 });
 
+test('both teams retain soft light outside their sharp cores and clearing removes the light', async ({ page }) => {
+  const result = await page.evaluate(() => {
+    const sample = (x, y) => Array.from(drawingContext.getImageData(
+      x * pixelDensity(), y * pixelDensity(), 1, 1).data);
+    env.clearParticles();
+    renderGame();
+    const dark = [sample(205, 202), sample(505, 502)];
+    env.particles.push(new Particle(200, 200, env, 0), new Particle(500, 500, env, 1));
+    const before = MatchSimulation.state(env);
+    renderGame();
+    const lit = [sample(205, 202), sample(505, 502)];
+    const after = MatchSimulation.state(env);
+    env.clearParticles();
+    renderGame();
+    return { dark, lit, cleared: [sample(205, 202), sample(505, 502)], before, after };
+  });
+  expect(result.after).toEqual(result.before);
+  expect(result.lit[0][2]).toBeGreaterThan(result.dark[0][2] + 2);
+  expect(result.lit[1][0]).toBeGreaterThan(result.dark[1][0] + 2);
+  expect(result.cleared).toEqual(result.dark);
+});
+
 test.describe('retina display', () => {
   test.use({ deviceScaleFactor: 3, viewport: { width: 1100, height: 900 } });
   test('uses native HiDPI backing pixels without changing world coordinates', async ({ page }) => {

@@ -44,7 +44,9 @@ controls. The canvas renders at a minimum of 1600×1600 backing pixels, rising
 to 2400×2400 on displays with a pixel density of 3. The logical world remains
 800×800, so changing display size or density does not change the simulation.
 `Renderer.js` provides shaded round blue motes, cached glow, a quiet background
-grid, outlined terrain and the cursor. It uses no random numbers or movement
+grid, outlined terrain and the cursor. Soft light is accumulated on a separate
+400×400 surface and scaled up; particle cores and terrain keep their HiDPI
+resolution. It uses no random numbers or movement
 updates. Pointer coordinates are mapped from the displayed canvas into the
 world using precise Pointer Events, including fractional screen coordinates.
 
@@ -66,6 +68,10 @@ collision-checked neighbour steps, including alternatives around occupied
 cells. Diagonal steps cannot cut through blocked corners. If the target is
 inside a wall or outside a reachable region, each region uses its closest
 free target cell. A fully sealed wall cannot be crossed.
+
+Each team reuses its eight deterministic direction orders per visited cell;
+terrain and target changes invalidate these choices.
+Current particle occupancy is checked on every movement and contact action.
 
 Free-space attraction uses a Euclidean correction so the resting swarm forms
 a circle. Individual movement phases and local update priorities avoid moving
@@ -176,6 +182,16 @@ keeps no such snapshot history and exposes no `gameHarness`.
 
 ## Development
 
+- [Navigation performance results](docs/navigation-performance-results.md):
+  retained direction caching and a discarded adaptive mesh experiment.
+- [Performance results](docs/performance-results.md): eight measured experiments,
+  seven retained improvements, one discarded cache, and reproducible comparisons.
+- [Performance analysis](docs/performance-analysis.md): the original client and
+  server profile, rendering comparison and proposed improvements. Run
+  `npm run profile:model`, `npm run profile:multiplayer -- baseline-isolated`
+  and `npm run profile:rendering` sequentially to reproduce the measurements.
+  Browser measurements need Playwright-Chromium; output goes to the ignored
+  `artifacts/performance/` directory. These commands do not alter game rules.
 - [TODO.md](TODO.md): priorities, bug status and acceptance criteria.
 - [AGENTS.md](AGENTS.md): repository instructions for coding agents.
 - [Original algorithm references](docs/liquid-war-reference.md): source files

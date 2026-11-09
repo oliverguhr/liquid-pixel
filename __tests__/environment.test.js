@@ -33,6 +33,25 @@ function expectConsistent(env) {
   }
 }
 
+test('both team fields follow added and cleared terrain even when targets stay unchanged', () => {
+  const env = environment();
+  const targets = [[64, 20], [12, 20]];
+  const updateFields = () => env.teams.forEach((team, id) => {
+    team.player.setTarget(...targets[id]);
+    team.player.update();
+    env.updateGradient(id);
+  });
+  updateFields();
+  const open = env.teams.map(team => [...team.distance]);
+  for (let y = 0; y < 48; y += 4) new Obstacle(env, 40, y);
+  updateFields();
+  expect(env.teams[0].distance[env.getCell(12, 20).index]).toBeGreaterThan(open[0][env.getCell(12, 20).index]);
+  expect(env.teams[1].distance[env.getCell(64, 20).index]).toBeGreaterThan(open[1][env.getCell(64, 20).index]);
+  env.clearObstacles();
+  updateFields();
+  expect(env.teams.map(team => [...team.distance])).toEqual(open);
+});
+
 test('Environment.getCell returns interior, edge and corner cells as map[y][x]', () => {
   const env = environment();
   const lastX = env.FIELD_X - 1;
@@ -169,14 +188,44 @@ test('a blocked target projects onto a free cell and recovers when moved', () =>
 test('a particle can take an alternative when the best neighbour is occupied', () => {
   const env = environment({ speed: 4 });
   const particle = particleAt(env, 12, 28);
-  particleAt(env, 16, 28);
   env.player.setTarget(68, 28);
   env.player.update();
   env.updateGradient();
+  // Prepare navigation while the route is free, then change live occupancy.
+  // A cached direction must never imply that its destination is still free.
+  env.teams[0].stationary = true;
+  particle.credit = 20;
+  expect(particle.update()).toBe(false);
+  env.teams[0].stationary = false;
+  particleAt(env, 16, 28);
   particle.credit = 20;
   expect(particle.update()).toBe(true);
   expect(particle.x).toBeGreaterThan(12);
   expectConsistent(env);
+});
+
+test.each([0, 1])('team %i reroutes after painting, target changes and clearing previously visited terrain', team => {
+  const env = environment();
+  const particle = new Particle(12, 20, env, team);
+  env.particles.push(particle);
+  env.teams[team].player.setTarget(64, 20);
+  // Exercise the normal movement loop before the terrain changes.
+  env.teams[team].stationary = true;
+  advance(env, 8);
+  for (let y = 0; y < 48; y += 4) new Obstacle(env, 16, y);
+  env.teams[team].stationary = false;
+  const arrive = (x, y) => {
+    env.teams[team].player.setTarget(x, y);
+    for (let step = 0; step < 160; step++) {
+      env.updateSubstep();
+      expectConsistent(env);
+    }
+    expect([particle.x, particle.y]).toEqual([x, y]);
+  };
+  arrive(64, 20);
+  arrive(4, 8);
+  env.clearObstacles();
+  arrive(64, 8);
 });
 
 test('painting is continuous, deduplicated and does not overwrite live particles', () => {

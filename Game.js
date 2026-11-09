@@ -6,6 +6,7 @@ let paintFrom = null;
 let painting = false;
 let activePointer = null;
 let uiState = '';
+let onlineUIState = '';
 let multiplayer = null;
 let resultTimer;
 const gameParams = new URLSearchParams(window.location.search);
@@ -128,6 +129,9 @@ function syncUI() {
 function syncOnlineUI() {
   if (!multiplayer) return;
   const { phase, connection, online, waiting } = multiplayer;
+  const key = JSON.stringify([phase, connection, online, waiting, multiplayer.notice || '']);
+  if (key === onlineUIState) return;
+  onlineUIState = key;
   document.body.dataset.view = phase;
   document.querySelector('#lobby-view').hidden = phase !== 'lobby' && phase !== 'searching';
   document.querySelector('#game-view').hidden = phase !== 'match';
