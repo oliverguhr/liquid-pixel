@@ -1,6 +1,6 @@
 services:
   liquid-pixel:
-    image: ghcr.io/oliverguhr/liquid-pixel:${LIQUID_PIXEL_TAG:-latest}
+    build: .
     init: true
     restart: unless-stopped
     ports:

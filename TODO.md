@@ -253,18 +253,18 @@ einzeln geprüft werden.
 
 - [x] Dockerfile mit Produktionsabhängigkeiten, HTTP-Healthcheck und
   bestehendem HTTP-/WebSocket-Server bereitstellen.
-- [x] GitHub-Actions-Workflow für Modell-/Servertests, Container-Smokecheck
-  und Veröffentlichung auf GHCR für AMD64 und ARM64 ergänzen.
-- [x] Compose-Datei für das fertige GHCR-Image sowie Start, Update und
-  Registry-Anmeldung in der README dokumentieren.
-- [ ] Erste Veröffentlichung auf GitHub und Containerstart auf dem Testserver
-  nachweisen.
+- [x] Compose-Datei zum direkten Bauen auf dem Testserver sowie Start und
+  Update in der README dokumentieren.
+- [x] Den zunächst ergänzten GitHub-Actions-/GHCR-Ablauf auf Nutzerwunsch
+  entfernen; der Testserver baut das Image selbst mit Docker Compose.
+- [ ] Docker-Build und Containerstart auf dem Testserver nachweisen.
 
-Lokal geprüft am 10. November 2026: acht Servertests, Actionlint,
-offizielles Compose-Schema sowie Lobby, Playground, alle 14 Web-Assets,
-Healthcheck und WebSocket mit isolierten Produktionsabhängigkeiten.
-Ein tatsächlicher Docker-Build und die Veröffentlichung sind noch offen:
-In der Arbeitsumgebung fehlen Docker und ein GitHub-Schreibzugriff.
+Die ursprüngliche Container-Vorbereitung wurde am 10. November 2026 mit acht
+Servertests sowie Lobby, Playground, allen 14 Web-Assets, Healthcheck und
+WebSocket mit isolierten Produktionsabhängigkeiten geprüft. Nach der
+Vereinfachung sind Compose-Schema, Dokumentation und Diff erneut geprüft.
+Ein tatsächlicher Docker-Build bleibt offen, da Docker in der Arbeitsumgebung
+nicht installiert ist. Der automatische Veröffentlichungsworkflow entfällt.
 
 ## Spätere Aufgaben
 
