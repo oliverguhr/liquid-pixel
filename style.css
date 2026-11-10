@@ -121,9 +121,9 @@ kbd { display: grid; place-items: center; width: 18px; height: 18px; border: 1px
 .lobby-connection { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; color: #6e8d9b; }
 .lobby-art { position: relative; min-height: 380px; }
 .lobby-art > span { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; color: #577985; font-size: 10px; letter-spacing: 3px; }
-.swarm-orbit { position: absolute; width: 240px; aspect-ratio: 1; border-radius: 50%; background-size: 9px 9px; background-image: radial-gradient(circle, #9ddfff 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #43bfff55); }
-.orbit-blue { left: 3%; top: 40px; transform: rotate(-14deg); }
-.orbit-red { right: 0; top: 135px; width: 190px; background-image: radial-gradient(circle, #ff8ea6 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #ff659c44); transform: rotate(12deg); }
+.swarm-orbit { position: absolute; width: 240px; aspect-ratio: 1; border-radius: 50%; background-size: 9px 9px; background-image: radial-gradient(circle, #9ddfff 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #43bfff55); pointer-events: none; transition: transform 700ms cubic-bezier(.2,.7,.2,1); }
+.orbit-blue { left: 3%; top: 40px; transform: translate(calc(var(--swarm-x, 0) * 24px), calc(var(--swarm-y, 0) * 18px)) rotate(calc(-14deg + var(--swarm-x, 0) * 5deg)) scale(calc(1 + var(--swarm-x, 0) * .035), calc(1 - var(--swarm-x, 0) * .025)); }
+.orbit-red { right: 0; top: 135px; width: 190px; background-image: radial-gradient(circle, #ff8ea6 1.5px, transparent 2px); filter: drop-shadow(0 0 16px #ff659c44); transform: translate(calc(var(--swarm-x, 0) * 36px), calc(var(--swarm-y, 0) * 26px)) rotate(calc(12deg - var(--swarm-x, 0) * 7deg)) scale(calc(1 - var(--swarm-y, 0) * .025), calc(1 + var(--swarm-y, 0) * .035)); transition-duration: 950ms; }
 .result-view { min-height: 62svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 55px 20px; text-align: center; }
 .result-view h1 { margin-top: 20px; font-size: clamp(28px, 5vw, 52px); }
 #result-message { max-width: 500px; color: #a7becb; line-height: 1.8; }
@@ -171,4 +171,4 @@ body[data-view="match"] .online-controls, body[data-view="match"] .online-hint {
   .button-clear { min-height: 42px; }
   .app-footer { font-size: 8px; margin-top: 25px; }
 }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } .swarm-orbit { transform: none; transition: none; } }

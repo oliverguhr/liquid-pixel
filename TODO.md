@@ -95,6 +95,8 @@ liegt nach `npm run play:preview` unter
 - [x] Den Look der Lobby ins Spiel übertragen: kleinere runde Partikel mit
   deutlichen Zwischenräumen und erhaltenem Leuchten. Seitliches Abdriften
   begrenzen, damit die ruhende Wolke keine achteckigen Kanten entwickelt.
+- [x] Die dekorativen Lobby-Wolken dezent auf die Maus reagieren lassen:
+  weiches Folgen, leichtes Verformen und Zurückgleiten; reduzierte Bewegung beachten.
 
 Nachweise und Vorschauen: [docs/presentation-validation.md](docs/presentation-validation.md).
 
@@ -246,6 +248,23 @@ einzeln geprüft werden.
   [navigation-performance-results.md](docs/navigation-performance-results.md).
 - [x] Endgültigen Stand erneut prüfen: 68 Modell-/Servertests und alle
   45 Browserfälle bestanden; der LAN-Server liefert die geprüfte Fassung.
+
+## Docker und Testserver
+
+- [x] Dockerfile mit Produktionsabhängigkeiten, HTTP-Healthcheck und
+  bestehendem HTTP-/WebSocket-Server bereitstellen.
+- [x] GitHub-Actions-Workflow für Modell-/Servertests, Container-Smokecheck
+  und Veröffentlichung auf GHCR für AMD64 und ARM64 ergänzen.
+- [x] Compose-Datei für das fertige GHCR-Image sowie Start, Update und
+  Registry-Anmeldung in der README dokumentieren.
+- [ ] Erste Veröffentlichung auf GitHub und Containerstart auf dem Testserver
+  nachweisen.
+
+Lokal geprüft am 10. November 2026: acht Servertests, Actionlint,
+offizielles Compose-Schema sowie Lobby, Playground, alle 14 Web-Assets,
+Healthcheck und WebSocket mit isolierten Produktionsabhängigkeiten.
+Ein tatsächlicher Docker-Build und die Veröffentlichung sind noch offen:
+In der Arbeitsumgebung fehlen Docker und ein GitHub-Schreibzugriff.
 
 ## Spätere Aufgaben
 

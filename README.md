@@ -13,7 +13,9 @@ npm start
 ```
 
 Open http://127.0.0.1:4173. The lobby shows connected players and players waiting
-for an opponent. Click `Spielen` in two tabs or browsers to start a random
+for an opponent. Its decorative swarms gently follow the mouse, then settle
+back when it leaves; reduced-motion preferences keep them still.
+Click `Spielen` in two tabs or browsers to start a random
 two-player match. Search can be cancelled. Move the mouse or use the arrow
 keys to guide your assigned blue or red swarm. Both teams start with 1,000
 units. Capture the entire other team to win; both players return to the lobby
@@ -80,6 +82,68 @@ phases and local update priorities avoid moving the whole cloud as a rigid
 shape. Subtle, stable pixel shades make individual
 units visible. These phases are deterministic; movement uses no fresh random
 numbers. Randomness only determines the seeded spawn order.
+
+## Docker and test-server deployment
+
+The [container workflow](.github/workflows/container.yml) builds and publishes
+`ghcr.io/oliverguhr/liquid-pixel:latest` on pushes to `main`. It first runs the
+model/server tests and checks the built container's HTTP assets, health check
+and WebSocket connection. Images support Linux AMD64 and ARM64. Each build
+also gets a `sha-<full-commit-id>` tag; a Git tag such as `v1.0.0` publishes
+the image tag `1.0.0`. The workflow can also be started manually in GitHub
+Actions. Publishing uses GitHub's built-in `GITHUB_TOKEN`; no registry secret
+needs to be configured.
+
+The workflow and Docker files must be committed and pushed before the first
+image is available. Wait for **Build and publish container** to succeed in
+the repository's Actions tab.
+
+On the test server, install Docker Engine with the Docker Compose plugin.
+Copy [compose.yaml](compose.yaml) into an empty directory; the server needs
+neither Node.js nor a checkout of the game source. Then run there:
+
+```bash
+docker compose pull
+docker compose up -d --wait
+docker compose logs -f
+```
+
+Open `http://<test-server>:4173`; `/playground` opens the singleplayer.
+HTTP and `/socket` WebSocket connections share this port. The published port
+also accepts LAN connections. If a reverse proxy provides HTTPS, forward
+WebSocket upgrades on `/socket` to this same container.
+
+GitHub Container Registry packages are initially private. For private pulls,
+run `docker login ghcr.io -u oliverguhr` on the test server and enter a GitHub
+personal access token (classic) with `read:packages` as the password. To allow
+pulling without login, change the package visibility to Public in GitHub's
+package settings after the first publish. See the
+[GitHub Container Registry documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+To change the host port or select an existing image tag, create a `.env` file
+beside `compose.yaml`, for example:
+
+```dotenv
+LIQUID_PIXEL_PORT=8080
+LIQUID_PIXEL_TAG=1.0.0
+```
+
+Omit these settings to use port 4173 and `latest`. To update, run
+`docker compose pull` followed by `docker compose up -d --wait` again. Stop
+with `docker compose down`. Restarting or updating ends ongoing matches;
+lobby and match state live only in memory, so no volume is required.
+
+For a local build without the registry:
+
+```bash
+docker build -t liquid-pixel:local .
+docker run --rm --init -p 4173:4173 liquid-pixel:local
+```
+
+The image installs only locked production dependencies, runs the Node server
+as the unprivileged `node` user and listens on `0.0.0.0:4173` inside the
+container. Development tools, local dependencies and generated artifacts
+are excluded from the build context.
 
 ## Tests and visual verification
 

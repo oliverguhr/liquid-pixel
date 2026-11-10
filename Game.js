@@ -38,6 +38,7 @@ function setup() {
   document.querySelector('#lobby-view').hidden = soloMode;
   document.querySelector('#pause-button').hidden = !soloMode;
   if (!soloMode) {
+    installLobbyArt();
     manualStepping = false;
     document.querySelector('#playground-title').textContent = 'Dein Schwarm. Dein Spiel.';
     document.querySelector('#game-view .field-heading .eyebrow').textContent = 'DAS MATCH';
@@ -72,6 +73,41 @@ function setup() {
     if (soloMode) noLoop();
   }
   renderGame();
+}
+
+function installLobbyArt() {
+  const lobby = document.querySelector('#lobby-view');
+  const art = lobby.querySelector('.lobby-art');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let pointer = null;
+  let pendingFrame = 0;
+
+  const update = () => {
+    pendingFrame = 0;
+    if (!pointer || lobby.hidden || document.hidden || reducedMotion.matches) {
+      art.style.removeProperty('--swarm-x');
+      art.style.removeProperty('--swarm-y');
+      return;
+    }
+    const bounds = art.getBoundingClientRect();
+    const offset = (position, start, size) => Math.max(-1, Math.min(1, (position - start) / size * 2 - 1));
+    art.style.setProperty('--swarm-x', offset(pointer.x, bounds.left, bounds.width).toFixed(3));
+    art.style.setProperty('--swarm-y', offset(pointer.y, bounds.top, bounds.height).toFixed(3));
+  };
+  const schedule = () => {
+    if (!pendingFrame) pendingFrame = requestAnimationFrame(update);
+  };
+  const reset = () => { pointer = null; schedule(); };
+  lobby.addEventListener('pointermove', event => {
+    if (event.pointerType === 'touch' || reducedMotion.matches) return;
+    pointer = { x: event.clientX, y: event.clientY };
+    schedule();
+  }, { passive: true });
+  lobby.addEventListener('pointerleave', reset);
+  window.addEventListener('blur', reset);
+  window.addEventListener('resize', reset);
+  document.addEventListener('visibilitychange', reset);
+  reducedMotion.addEventListener('change', reset);
 }
 
 function draw() {

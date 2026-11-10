@@ -1,0 +1,13 @@
+# Only send runtime files to the builder; omit local dependencies, Git and artifacts.
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!*.js
+playwright.config.js
+!index.html
+!style.css
+!scripts/
+scripts/**
+!scripts/serve.cjs
+!scripts/multiplayer.cjs

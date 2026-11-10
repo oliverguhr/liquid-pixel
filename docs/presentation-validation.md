@@ -69,3 +69,24 @@ Vorher-/Nachher-Bilder der Partikel sowie die ruhende und bewegte Wolke liegen
 unter `artifacts/round-preview/`. Wiederholtes Zeichnen erhält den Modellzustand.
 Der LAN-Server auf Port 4173 wurde mit Protokollversion 3 neu gestartet und
 per HTTP und WebSocket geprüft. Beide Browser müssen neu geladen werden.
+
+## Mausreaktion in der Lobby
+
+Die beiden dekorativen Wolken folgen der Maus innerhalb der Lobby leicht
+verzögert, mit unterschiedlichen Wegen, Drehungen und einer kleinen Dehnung.
+Die Bewegung bleibt auf höchstens 24/18 Pixel pro Achse bei Blau und 36/26 bei
+Rot begrenzt. Beim Verlassen, Fokusverlust oder Größenwechsel gleiten sie
+zurück. Touch-Eingaben und `prefers-reduced-motion` lösen keine Bewegung aus.
+Die vorhandenen Punktflächen und ihr Leuchten bleiben erhalten.
+
+`Game.js` bündelt Zeigerereignisse pro Browserframe; die Übergänge übernimmt
+CSS. Es gibt dafür keine dauerhaft laufende Animationsschleife und keine
+zusätzliche Partikelsimulation. Spielregeln und Protokollversion bleiben gleich.
+
+Geprüft am 9. November: Die sechs vorhandenen Darstellungs- und Lobbyfälle
+einschließlich Match-Rückkehr bestehen. Ein zusätzlicher Browserlauf mit echten
+Mausereignissen prüft beide Bewegungsrichtungen, Zurückgleiten, reduzierte
+Bewegung, schmale Ansicht ohne horizontalen Überlauf, Suche und Abbruch sowie
+Match-Start und Rückkehr zur neutralen Lobby. Es traten keine JavaScript-Fehler
+auf. Bilder, Zustandswerte und Animation liegen unter
+`artifacts/lobby-interaction/`, insbesondere `lobby-motion.webm`.
